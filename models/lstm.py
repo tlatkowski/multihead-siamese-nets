@@ -1,10 +1,11 @@
 import tensorflow as tf
+from layers.similarity import manhattan_similarity
+from layers.losses import mse
 
 
 class LSTMBasedSiameseNet:
 
-    def __init__(self, sequence_len, vocabulary_size, embedding_size, hidden_size,
-                 batch_size):
+    def __init__(self, sequence_len, vocabulary_size, embedding_size, hidden_size):
         self.x1 = tf.placeholder(dtype=tf.int32, shape=[None, sequence_len])
         self.x2 = tf.placeholder(dtype=tf.int32, shape=[None, sequence_len])
         self.labels = tf.placeholder(dtype=tf.int32, shape=[None, 1])
@@ -34,27 +35,17 @@ class LSTMBasedSiameseNet:
             self.out1 = tf.reduce_mean(self.out1, axis=1)
             self.out2 = tf.reduce_mean(self.out2, axis=1)
 
-            self.predictions = similarity(self.out1, self.out2)
+            self.predictions = manhattan_similarity(self.out1, self.out2)
 
         with tf.variable_scope('loss'):
-            self.loss = tf.losses.mean_squared_error(self.labels, self.predictions)
-            self.opt = tf.train.GradientDescentOptimizer(learning_rate=0.1).minimize(self.loss)
+            self.loss = mse(self.labels, self.predictions)
+            self.opt = tf.train.AdamOptimizer(learning_rate=0.001).minimize(self.loss)
 
         with tf.variable_scope('metrics'):
-            # self.predictions = tf.cast(self.predictions, 'float')
-            temp_sim = tf.subtract(tf.ones_like(self.predictions), tf.rint(self.predictions))
-
-            correct_predictions = tf.equal(temp_sim, tf.cast(self.labels, 'float'))
-            self.acc = tf.reduce_mean(tf.cast(correct_predictions, 'float'))
+            self.temp_sim = tf.rint(self.predictions)
+            self.correct_predictions = tf.equal(self.temp_sim, tf.cast(self.labels, 'float'))
+            self.acc = tf.reduce_mean(tf.cast(self.correct_predictions, 'float'))
 
 
-def contrastive_loss(self, predicted, actual):
-    pass
 
 
-def mse_loss(self, predicted, actual):
-    pass
-
-
-def similarity(sentence1, sentence2):
-    return tf.exp(-tf.norm(sentence1 - sentence2, ord=1, axis=1, keep_dims=True))

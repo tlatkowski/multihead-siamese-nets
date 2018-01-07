@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from models.lstm import LSTMBasedSiameseNet, similarity
+from models.lstm import LSTMBasedSiameseNet, manhattan_similarity
 
 
 class LSTMBasedSiameseNetTest(tf.test.TestCase):
@@ -23,7 +23,7 @@ class LSTMBasedSiameseNetTest(tf.test.TestCase):
         with self.test_session() as test_session:
             x1 = np.array([2., 3., 4.])
             x2 = np.array([3., 1., 5.])
-            siamese_lstm_model = similarity(x1, x2)
+            siamese_lstm_model = manhattan_similarity(x1, x2)
 
             actual_pearson_coefficient = test_session.run(siamese_lstm_model)
             correct_pearson_coefficient = tf.constant([.5])
@@ -33,7 +33,7 @@ class LSTMBasedSiameseNetTest(tf.test.TestCase):
         with self.test_session() as test_session:
             x1 = np.array([[1., 1., 1.], [2., 2., 2.]])
             x2 = np.array([[2., 2., 2.], [1., 1., 1.]])
-            siamese_lstm_model = similarity(x1, x2)
+            siamese_lstm_model = manhattan_similarity(x1, x2)
 
             actual_pearson_coefficient = test_session.run(siamese_lstm_model)
             correct_pearson_coefficient = tf.constant([.5])

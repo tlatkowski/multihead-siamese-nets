@@ -12,8 +12,8 @@ logs_path = 'logs/'
 # ++++++++++++++++++++++++++++++++++
 embedding_size = 64
 hidden_size = 256
-num_epochs = 100
-batch_size = 32
+num_epochs = 10
+batch_size = 128
 eval_every = 10
 # ++++++++++++++++++++++++++++++++++
 
@@ -21,8 +21,16 @@ sen1, sen2, labels, max_doc_len, vocabulary_size = load_snli(data_fn)
 num_batches = len(labels) // batch_size
 print('Num batches: ', num_batches)
 
+train_sen1 = sen1[:-1000]
+train_sen2 = sen2[:-1000]
+train_labels = labels[:-1000]
+
+eval_sen1 = sen1[-1000:]
+eval_sen2 = sen2[-1000:]
+eval_labels = labels[-1000:]
+
 with tf.Session() as session:
-    model = LSTMBasedSiameseNet(max_doc_len, vocabulary_size, embedding_size, hidden_size, 100)
+    model = LSTMBasedSiameseNet(max_doc_len, vocabulary_size, embedding_size, hidden_size)
     init = tf.global_variables_initializer()
     init_local = tf.local_variables_initializer()
     session.run(init)
@@ -30,22 +38,25 @@ with tf.Session() as session:
     if not os.path.isdir(logs_path):
         os.makedirs(logs_path)
     summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
-    for epoch in range(num_epochs):
-        tqdm_iter = tqdm(range(num_batches))
-        for batch in range(num_batches):
-            x1_batch = sen1[batch * batch_size:(batch + 1) * batch_size]
-            x2_batch = sen2[batch * batch_size:(batch + 1) * batch_size]
-            y_batch = labels[batch * batch_size:(batch+1) * batch_size]
+    metrics = {'acc': 0.0}
+    for epoch in tqdm(range(num_epochs), desc="Epochs"):
+        tqdm_iter = tqdm(range(num_batches),
+                                total=num_batches,
+                                desc="Batches",
+                                leave=False,
+                                postfix=metrics)
+        for batch in tqdm_iter:
+            x1_batch = train_sen1[batch * batch_size:(batch + 1) * batch_size]
+            x2_batch = train_sen2[batch * batch_size:(batch + 1) * batch_size]
+            y_batch = train_labels[batch * batch_size:(batch+1) * batch_size]
             feed_dict = {model.x1: x1_batch, model.x2: x2_batch, model.labels: y_batch}
-            my_opt, summary = session.run([model.loss, model.opt], feed_dict=feed_dict)
-            print(my_opt)
+            loss, _ = session.run([model.loss, model.opt], feed_dict=feed_dict)
             if batch % eval_every == 0:
-                print('count')
-                feed_dict = {model.x1: sen1, model.x2: sen2, model.labels: labels}
+                feed_dict = {model.x1: eval_sen1, model.x2: eval_sen2, model.labels: eval_labels}
                 acc = session.run([model.acc], feed_dict=feed_dict)
-                tqdm_iter.set_postfix(acc=acc,
-                                      batches='{}/{}'.format(batch, num_batches),
-                                      epochs='{}/{}'.format(epoch, num_epochs))
+                tqdm_iter.set_postfix(acc=acc)
+
+
 
 
 
