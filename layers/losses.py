@@ -5,11 +5,11 @@ def contrastive(predictions, labels):
     raise NotImplementedError
 
 
-def _contrastive_plus():
-    pass
+def _contrastive_plus(model_energy):
+    return 0.25 * tf.square(1 - model_energy)
 
 
-def _contrastive_minus():
+def _contrastive_minus(model_energy):
     pass
 
 
