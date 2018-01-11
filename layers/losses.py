@@ -2,15 +2,19 @@ import tensorflow as tf
 
 
 def contrastive(predictions, labels):
-    raise NotImplementedError
+    contrastive_loss_minus = tf.to_float(labels) * _contrastive_plus(predictions)
+    contrastive_loss_plus = (1.0 - tf.to_float(labels)) * _contrastive_minus(predictions)
+    c_loss = tf.reduce_sum(contrastive_loss_plus + contrastive_loss_minus)
+    return c_loss
 
 
 def _contrastive_plus(model_energy):
-    return 0.25 * tf.square(1 - model_energy)
+    return 0.25 * tf.square(1.0 - tf.to_float(model_energy))
 
 
-def _contrastive_minus(model_energy):
-    pass
+def _contrastive_minus(model_energy, margin=tf.constant(0.5)):
+    mask = tf.to_float(tf.less(tf.to_float(model_energy), margin))
+    return mask*tf.square(tf.to_float(model_energy))
 
 
 def cross_entropy(predictions, labels):

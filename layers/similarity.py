@@ -6,6 +6,7 @@ def manhattan_similarity(x1, x2):
 
 
 def cosine_similarity(x1, x2):
-    counter = tf.reduce_sum(x1 * x2)
-    denominator = tf.norm(x1, ord=2) * tf.norm(x2, ord=2)
-    return counter/denominator
+    num = tf.reduce_sum(x1 * x2, axis=1)
+    denom = tf.sqrt(tf.reduce_sum(tf.square(x1), axis=1)) * tf.sqrt(tf.reduce_sum(tf.square(x2), axis=1))
+    cos_sim = tf.expand_dims(tf.div(num, denom), -1)
+    return cos_sim
