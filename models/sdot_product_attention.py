@@ -1,6 +1,7 @@
 import tensorflow as tf
 from layers.similarity import manhattan_similarity
 from layers.losses import mse
+from layers.basics import dropout, feed_forward
 
 
 class ScaledDotProductAttentionSiameseNet:
@@ -16,8 +17,8 @@ class ScaledDotProductAttentionSiameseNet:
             embedded_x2 = tf.gather(word_embeddings, self.x2)
 
         with tf.variable_scope('siamese-multihead-attention'):
-            self.out1 = multihead_attention(embedded_x1, embedded_x1, embedded_x1, reuse=False)
-            self.out2 = multihead_attention(embedded_x2, embedded_x2, embedded_x2)
+            self.out1 = stacked_multihead_attention(embedded_x1, num_blocks=2, reuse=False)
+            self.out2 = stacked_multihead_attention(embedded_x2, num_blocks=2, reuse=True)
 
             self.out1 = tf.reduce_sum(self.out1, axis=1)
             self.out2 = tf.reduce_sum(self.out2, axis=1)
@@ -62,7 +63,17 @@ def multihead_attention(queries, keys, values, num_units=None, num_heads=8, reus
         Q_K = tf.nn.softmax(Q_K / tf.sqrt(model_size))
 
         Q_K_V = tf.matmul(Q_K, V)
+        Q_K_V = dropout(Q_K_V)
         Q_K_V_ = tf.concat(tf.split(Q_K_V, num_heads, axis=0), axis=2)
 
         logits = tf.layers.dense(Q_K_V_, num_units)
     return logits
+
+
+def stacked_multihead_attention(x, num_blocks, reuse):
+    num_hiddens = x.get_shape().as_list()[-1]
+    for i in range(num_blocks):
+        with tf.variable_scope('multihead_block_{}'.format(i), reuse=reuse):
+            x = feed_forward(multihead_attention(x, x, x, reuse=reuse), num_hiddens=num_hiddens, activation=tf.nn.relu, reuse=reuse)
+
+    return x

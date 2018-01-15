@@ -1,6 +1,7 @@
 import tensorflow as tf
-from layers.similarity import cosine_similarity
-from layers.losses import contrastive
+from layers.similarity import manhattan_similarity
+from layers.losses import mse
+from layers.basics import dropout, feed_forward
 
 
 class CNNbasedSiameseNet:
@@ -16,13 +17,16 @@ class CNNbasedSiameseNet:
             embedded_x2 = tf.gather(word_embeddings, self.x2)
 
         with tf.variable_scope('siamese-cnn'):
-            self.out1 = cnn_layer(embedded_x1, reuse=False)
-            self.out2 = cnn_layer(embedded_x2)
+            self.out1 = cnn_layers(embedded_x1, sequence_len, reuse=False)
+            self.out2 = cnn_layers(embedded_x2, sequence_len)
 
-            self.predictions = cosine_similarity(self.out1, self.out2)
+            self.out1 = feed_forward(dropout(self.out1), num_hiddens=128, activation=tf.nn.relu)
+            self.out2 = feed_forward(dropout(self.out2), num_hiddens=128, activation=tf.nn.relu)
+
+            self.predictions = manhattan_similarity(self.out1, self.out2)
 
         with tf.variable_scope('loss'):
-            self.loss = contrastive(self.labels, self.predictions)
+            self.loss = mse(self.labels, self.predictions)
             self.opt = tf.train.AdamOptimizer(learning_rate=0.001).minimize(self.loss)
 
         with tf.variable_scope('metrics'):
@@ -35,7 +39,7 @@ class CNNbasedSiameseNet:
             self.summary_op = tf.summary.merge_all()
 
 
-def cnn_layer(embedded_x, num_filters=200, filter_size=3, reuse=True):
+def cnn_layer(embedded_x, max_seq_len, num_filters=200, filter_size=3, reuse=True):
     embedding_dim = embedded_x.get_shape().as_list()[-1]
     embedded_x_expanded = tf.expand_dims(embedded_x, -1)
     with tf.variable_scope('convolution', reuse=reuse):
@@ -44,8 +48,16 @@ def cnn_layer(embedded_x, num_filters=200, filter_size=3, reuse=True):
                                       kernel_size=[filter_size, embedding_dim],
                                       activation=tf.nn.relu)
         pooling = tf.layers.max_pooling2d(convoluted,
-                                          pool_size=[76, 1],
+                                          pool_size=[max_seq_len - filter_size + 1, 1],
                                           strides=[1, 1])
         pooling_flat = tf.reshape(pooling, [-1, num_filters])
     return pooling_flat
 
+
+def cnn_layers(embedded_x, max_seq_len, num_filters=[50, 50, 50], filter_sizes=[2, 3, 4], reuse=True):
+    pooled_flats = []
+    for i, (n, size) in enumerate(zip(num_filters, filter_sizes)):
+        with tf.variable_scope('cnn_layer_{}'.format(i), reuse=reuse):
+            pooled_flat = cnn_layer(embedded_x, max_seq_len, num_filters=n, filter_size=size, reuse=reuse)
+            pooled_flats.append(pooled_flat)
+    return tf.concat(pooled_flats, axis=1)
