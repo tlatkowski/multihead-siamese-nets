@@ -6,10 +6,13 @@ from layers.basics import dropout, feed_forward
 
 class CNNbasedSiameseNet:
 
-    def __init__(self, sequence_len, vocabulary_size, embedding_size, hidden_size):
+    def __init__(self, sequence_len, vocabulary_size, embedding_size, model_cfg):
         self.x1 = tf.placeholder(dtype=tf.int32, shape=[None, sequence_len])
         self.x2 = tf.placeholder(dtype=tf.int32, shape=[None, sequence_len])
         self.labels = tf.placeholder(dtype=tf.int32, shape=[None, 1])
+
+        self.num_filters = model_cfg['PARAMS']['num_filters']
+        self.filter_sizes = model_cfg['PARAMS']['filter_sizes']
 
         with tf.variable_scope('embeddings'):
             word_embeddings = tf.get_variable('word_embeddings', [vocabulary_size, embedding_size])

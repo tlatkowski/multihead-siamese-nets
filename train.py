@@ -5,7 +5,7 @@ import tensorflow as tf
 from tqdm import tqdm
 
 from data.dataset import Dataset
-from models.sdot_product_attention import ScaledDotProductAttentionSiameseNet
+from models.multihead_attention import ScaledDotProductAttentionSiameseNet
 
 data_fn = 'train_snli.txt'
 logs_path = 'logs/'
