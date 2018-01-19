@@ -2,7 +2,7 @@ import tensorflow as tf
 
 
 def feed_forward(x, num_hiddens, activation=None, reuse=False):
-    with tf.variable_scope('feed-forward', reuse=reuse):
+    with tf.variable_scope('feed-forward2', reuse=reuse):
         ff = tf.layers.dense(x, num_hiddens, activation=activation, reuse=reuse)
     return ff
 

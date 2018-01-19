@@ -6,15 +6,18 @@ from layers.basics import dropout, feed_forward, residual, linear, normalization
 
 class ScaledDotProductAttentionSiameseNet:
 
-    def __init__(self, sequence_len, vocabulary_size, embedding_size, model_cfg):
+    def __init__(self, sequence_len, vocabulary_size, main_cfg, model_cfg):
         self.x1 = tf.placeholder(dtype=tf.int32, shape=[None, sequence_len])
         self.x2 = tf.placeholder(dtype=tf.int32, shape=[None, sequence_len])
         self.labels = tf.placeholder(dtype=tf.int32, shape=[None, 1])
+
         self.num_blocks = int(model_cfg['PARAMS']['num_blocks'])
         self.num_heads = int(model_cfg['PARAMS']['num_heads'])
+        self.embedding_size = int(main_cfg['PARAMS']['embedding_size'])
+        self.learning_rate = float(main_cfg['TRAINING']['learning_rate'])
 
         with tf.variable_scope('embeddings'):
-            word_embeddings = tf.get_variable('word_embeddings', [vocabulary_size, embedding_size])
+            word_embeddings = tf.get_variable('word_embeddings', [vocabulary_size, self.embedding_size])
             embedded_x1 = tf.gather(word_embeddings, self.x1)
             embedded_x2 = tf.gather(word_embeddings, self.x2)
 
@@ -36,7 +39,7 @@ class ScaledDotProductAttentionSiameseNet:
 
         with tf.variable_scope('loss'):
             self.loss = mse(self.labels, self.predictions)
-            self.opt = tf.train.AdamOptimizer(learning_rate=0.001).minimize(self.loss)
+            self.opt = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
 
         with tf.variable_scope('metrics'):
             self.temp_sim = tf.rint(self.predictions)

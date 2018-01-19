@@ -1,4 +1,5 @@
 import configparser
+from argparse import ArgumentParser
 import os
 
 import tensorflow as tf
@@ -6,12 +7,21 @@ from tqdm import tqdm
 
 from data.dataset import Dataset
 from models.multihead_attention import ScaledDotProductAttentionSiameseNet
+from models.cnn import CNNbasedSiameseNet
+from models.lstm import LSTMBasedSiameseNet
 
 data_fn = 'train_snli.txt'
 logs_path = 'logs/'
 
+# TODO make generic class
+models = {
+    'cnn': CNNbasedSiameseNet,
+    'rnn': LSTMBasedSiameseNet,
+    'multihead': ScaledDotProductAttentionSiameseNet
+}
 
-def train(config, model_cfg):
+
+def train(config, model, model_cfg):
 
     num_tests = 1000
     snli_dataset = Dataset(data_fn, num_tests)
@@ -25,12 +35,10 @@ def train(config, model_cfg):
     batch_size = int(config['TRAINING']['batch_size'])
     eval_every = int(config['TRAINING']['eval_every'])
 
-    embedding_size = int(config['MODEL']['embedding_size'])
-
     num_batches = len(snli_dataset.labels - num_tests) // batch_size
 
     with tf.Session() as session:
-        model = ScaledDotProductAttentionSiameseNet(max_doc_len, vocabulary_size, embedding_size, model_cfg)
+        model = model(max_doc_len, vocabulary_size, config, model_cfg)
         global_step = 0
 
         init = tf.global_variables_initializer()
@@ -79,12 +87,22 @@ def train(config, model_cfg):
 
 
 def main():
-    config = configparser.ConfigParser()
-    config.read('config/config.ini')
+
+    parser = ArgumentParser()
+    parser.add_argument('model',
+                             default='multihead',
+                             choices=['rnn', 'cnn', 'multihead'],
+                             help='model used during training (default: %(default))')
+    args = parser.parse_args()
+    main_config = configparser.ConfigParser()
+    main_config.read('config/config.ini')
 
     model_cfg = configparser.ConfigParser()
-    model_cfg.read('config/model/multihead.ini')
-    train(config, model_cfg)
+    model_cfg.read('config/model/{}.ini'.format(args.model))
+
+    model = models[args.model]
+
+    train(main_config, model, model_cfg)
 
 
 if __name__ == '__main__':
