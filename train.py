@@ -1,14 +1,14 @@
 import configparser
-from argparse import ArgumentParser
 import os
+from argparse import ArgumentParser
 
 import tensorflow as tf
 from tqdm import tqdm
 
 from data.dataset import Dataset
-from models.multihead_attention import ScaledDotProductAttentionSiameseNet
 from models.cnn import CNNbasedSiameseNet
 from models.lstm import LSTMBasedSiameseNet
+from models.multihead_attention import ScaledDotProductAttentionSiameseNet
 
 data_fn = 'train_snli.txt'
 logs_path = 'logs/'
@@ -47,8 +47,8 @@ def train(config, model, model_cfg):
         session.run(init_local)
         if not os.path.isdir(logs_path):
             os.makedirs(logs_path)
-        eval_summary_writer = tf.summary.FileWriter(logs_path + 'test', graph=session.graph)
-        train_summary_writer = tf.summary.FileWriter(logs_path + 'eval', graph=session.graph)
+        test_summary_writer = tf.summary.FileWriter(logs_path + 'test', graph=session.graph)
+        train_summary_writer = tf.summary.FileWriter(logs_path + 'train', graph=session.graph)
 
         metrics = {'acc': 0.0}
         for epoch in tqdm(range(num_epochs), desc="Epochs"):
@@ -64,9 +64,7 @@ def train(config, model, model_cfg):
             # ++++++++
             # small train set for measuring train accuracy
             eval_size = 1000
-            small_train1 = train_sen1[-eval_size:]
-            small_train2 = train_sen2[-eval_size:]
-            small_train_labels = train_labels[-eval_size:]
+            val_sen1, val_sen2, val_labels = snli_dataset.validation_instances(eval_size)
 
             for batch in tqdm_iter:
                 global_step += 1
@@ -76,14 +74,14 @@ def train(config, model, model_cfg):
                 feed_dict = {model.x1: x1_batch, model.x2: x2_batch, model.labels: y_batch}
                 loss, _ = session.run([model.loss, model.opt], feed_dict=feed_dict)
                 if batch % eval_every == 0:
-                    feed_dict = {model.x1: small_train1, model.x2: small_train2, model.labels: small_train_labels}
-                    train_summary = session.run(model.summary_op, feed_dict=feed_dict)
+                    feed_dict = {model.x1: val_sen1, model.x2: val_sen2, model.labels: val_labels}
+                    train_accuracy, train_summary = session.run([model.accuracy, model.summary_op], feed_dict=feed_dict)
                     train_summary_writer.add_summary(train_summary, global_step)
 
                     feed_dict = {model.x1: test_sen1, model.x2: test_sen2, model.labels: test_labels}
-                    accuracy, summary = session.run([model.accuracy, model.summary_op], feed_dict=feed_dict)
-                    eval_summary_writer.add_summary(summary, global_step)
-                    tqdm_iter.set_postfix(acc=accuracy)
+                    test_accuracy, test_summary = session.run([model.accuracy, model.summary_op], feed_dict=feed_dict)
+                    test_summary_writer.add_summary(test_summary, global_step)
+                    tqdm_iter.set_postfix(train_test_acc='{}|{}'.format(train_accuracy, test_accuracy))
 
 
 def main():
