@@ -10,17 +10,18 @@ class Dataset:
         self.__shuffle_train_idxs = range(len(self.labels) - num_tests)
         self.train_sen1 = self.sen1[:-self.num_tests]
         self.train_sen2 = self.sen2[:-self.num_tests]
+        self._train_labels = self.labels[:-self.num_tests]
 
     def train_instances(self, shuffle=False):
         if shuffle:
             self.__shuffle_train_idxs = np.random.permutation(range(len(self.__shuffle_train_idxs)))
             self.train_sen1 = self.train_sen1[self.__shuffle_train_idxs]
             self.train_sen2 = self.train_sen2[self.__shuffle_train_idxs]
+            self._train_labels = self._train_labels[self.__shuffle_train_idxs]
         return self.train_sen1, self.train_sen2
 
     def train_labels(self):
-        train_labels = self.labels[self.__shuffle_train_idxs]
-        return train_labels
+        return self._train_labels
 
     def test_instances(self):
         test_sen1 = self.sen1[-self.num_tests:]
