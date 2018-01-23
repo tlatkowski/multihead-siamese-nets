@@ -4,7 +4,8 @@ import numpy as np
 
 class Dataset:
 
-    def __init__(self, data_fn: str, num_tests: int):
+    # def __init__(self, data_fn: str, num_tests: int):
+    def __init__(self, data_fn, num_tests):
         self.num_tests = num_tests
         self.sen1, self.sen2, self.labels, self.max_doc_len, self.vocabulary_size = data_loader.load_snli(data_fn)
         self.__shuffle_train_idxs = range(len(self.labels) - num_tests)

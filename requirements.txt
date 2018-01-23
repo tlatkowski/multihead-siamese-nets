@@ -1,0 +1,5 @@
+tqdm==4.15.0
+pandas==0.13.1
+tflearn==0.3.2
+numpy==1.13.1
+tensorflow==1.2.1

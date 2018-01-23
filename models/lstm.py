@@ -1,23 +1,16 @@
 import tensorflow as tf
-from layers.similarity import manhattan_similarity
+
 from layers.losses import mse
+from layers.similarity import manhattan_similarity
+from models.base_model import SiameseNet
 
 
-class LSTMBasedSiameseNet:
+class LSTMBasedSiameseNet(SiameseNet):
 
     def __init__(self, sequence_len, vocabulary_size, main_cfg, model_cfg):
-        self.x1 = tf.placeholder(dtype=tf.int32, shape=[None, sequence_len])
-        self.x2 = tf.placeholder(dtype=tf.int32, shape=[None, sequence_len])
-        self.labels = tf.placeholder(dtype=tf.int32, shape=[None, 1])
+        SiameseNet.__init__(self, sequence_len, vocabulary_size, main_cfg)
 
         self.hidden_size = int(model_cfg['PARAMS']['hidden_size'])
-        self.embedding_size = int(main_cfg['PARAMS']['embedding_size'])
-        self.learning_rate = float(main_cfg['TRAINING']['learning_rate'])
-
-        with tf.variable_scope('embeddings'):
-            word_embeddings = tf.get_variable('word_embeddings', [vocabulary_size, self.embedding_size])
-            embedded_x1 = tf.gather(word_embeddings, self.x1)
-            embedded_x2 = tf.gather(word_embeddings, self.x2)
 
         with tf.variable_scope('siamese-lstm'):
             fw_rnn_cell = tf.nn.rnn_cell.BasicLSTMCell(self.hidden_size)
@@ -25,13 +18,13 @@ class LSTMBasedSiameseNet:
 
             outputs_sen1, _ = tf.nn.bidirectional_dynamic_rnn(fw_rnn_cell,
                                                               bw_rnn_cell,
-                                                              embedded_x1,
+                                                              self.embedded_x1,
                                                               dtype=tf.float32)
 
             tf.get_variable_scope().reuse_variables()
             outputs_sen2, _ = tf.nn.bidirectional_dynamic_rnn(fw_rnn_cell,
                                                               bw_rnn_cell,
-                                                              embedded_x2,
+                                                              self.embedded_x2,
                                                               dtype=tf.float32)
             self.out1 = tf.concat([outputs_sen1[0], outputs_sen1[1]], axis=2)
             self.out2 = tf.concat([outputs_sen2[0], outputs_sen2[1]], axis=2)
