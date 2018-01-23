@@ -1,1 +1,1 @@
-*.txt filter=lfs diff=lfs merge=lfs -text
+config/train_snli.txt filter=lfs diff=lfs merge=lfs -text
