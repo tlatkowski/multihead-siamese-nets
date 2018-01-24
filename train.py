@@ -8,22 +8,27 @@ from tqdm import tqdm
 from data.dataset import Dataset
 from models.cnn import CNNbasedSiameseNet
 from models.lstm import LSTMBasedSiameseNet
-from models.multihead_attention import ScaledDotProductAttentionSiameseNet
+from models.multihead_attention import MultiheadAttentionSiameseNet
 
-data_fn = 'train_snli.txt'
-logs_path = 'logs/'
 
 # TODO make generic class
 models = {
     'cnn': CNNbasedSiameseNet,
     'rnn': LSTMBasedSiameseNet,
-    'multihead': ScaledDotProductAttentionSiameseNet
+    'multihead': MultiheadAttentionSiameseNet
 }
 
 
 def train(config, model, model_cfg):
 
-    num_tests = 1000
+    num_epochs = int(config['TRAINING']['num_epochs'])
+    batch_size = int(config['TRAINING']['batch_size'])
+    eval_every = int(config['TRAINING']['eval_every'])
+
+    num_tests = int(config['DATA']['num_tests'])
+    data_fn = str(config['DATA']['file_name'])
+    logs_path = str(config['DATA']['logs_path'])
+
     snli_dataset = Dataset(data_fn, num_tests)
     max_doc_len = snli_dataset.max_doc_len
     vocabulary_size = snli_dataset.vocabulary_size
@@ -31,11 +36,7 @@ def train(config, model, model_cfg):
     test_sen1, test_sen2 = snli_dataset.test_instances()
     test_labels = snli_dataset.test_labels()
 
-    num_epochs = int(config['TRAINING']['num_epochs'])
-    batch_size = int(config['TRAINING']['batch_size'])
-    eval_every = int(config['TRAINING']['eval_every'])
-
-    num_batches = len(snli_dataset.labels - num_tests) // batch_size
+    num_batches = (len(snli_dataset.labels) - num_tests) // batch_size
 
     with tf.Session() as session:
         model = model(max_doc_len, vocabulary_size, config, model_cfg)
@@ -81,7 +82,7 @@ def train(config, model, model_cfg):
                     feed_dict = {model.x1: test_sen1, model.x2: test_sen2, model.labels: test_labels}
                     test_accuracy, test_summary = session.run([model.accuracy, model.summary_op], feed_dict=feed_dict)
                     test_summary_writer.add_summary(test_summary, global_step)
-                    tqdm_iter.set_postfix(train_test_acc='{}|{}'.format(train_accuracy, test_accuracy))
+                    tqdm_iter.set_postfix(train_test_acc='{:.2f}|{:.2f}'.format(float(train_accuracy), float(test_accuracy)))
 
 
 def main():

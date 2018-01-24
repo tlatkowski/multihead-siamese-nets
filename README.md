@@ -53,6 +53,15 @@ embedding_size = 128
 ```
 
 # Model configuration
+Additionally each model contains its own specific configuration file in which changing hyperparameters is possible.
+
+## Multihead Attention Network configuration file
+```ini
+[PARAMS]
+num_blocks = 2
+num_heads = 8
+use_residual = False
+```
 
 # Comparison of models
 To be done
