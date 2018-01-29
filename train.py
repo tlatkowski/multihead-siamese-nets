@@ -6,14 +6,14 @@ import tensorflow as tf
 from tqdm import tqdm
 
 from data.dataset import Dataset
-from models.cnn import CNNbasedSiameseNet
+from models.cnn import CnnSiameseNet
 from models.lstm import LSTMBasedSiameseNet
 from models.multihead_attention import MultiheadAttentionSiameseNet
 
 
 # TODO make generic class
 models = {
-    'cnn': CNNbasedSiameseNet,
+    'cnn': CnnSiameseNet,
     'rnn': LSTMBasedSiameseNet,
     'multihead': MultiheadAttentionSiameseNet
 }
