@@ -17,16 +17,16 @@ class MultiheadAttentionSiameseNet(SiameseNet):
         use_residual = bool(model_cfg['PARAMS']['use_residual'])
 
         out1 = stacked_multihead_attention(self.embedded_x1,
-                                                num_blocks=num_blocks,
-                                                num_heads=num_heads,
-                                                reuse=False,
-                                                use_residual=use_residual)
+                                           num_blocks=num_blocks,
+                                           num_heads=num_heads,
+                                           reuse=False,
+                                           use_residual=use_residual)
 
         out2 = stacked_multihead_attention(self.embedded_x2,
-                                            num_blocks=num_blocks,
-                                            num_heads=num_heads,
-                                            reuse=True,
-                                            use_residual=use_residual)
+                                           num_blocks=num_blocks,
+                                           num_heads=num_heads,
+                                           reuse=True,
+                                           use_residual=use_residual)
 
         out1 = tf.reduce_sum(out1, axis=1)
         out2 = tf.reduce_sum(out2, axis=1)

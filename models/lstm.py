@@ -1,6 +1,7 @@
 import tensorflow as tf
 
 from layers.losses import mse
+from layers.recurrent import rnn_layer
 from layers.similarity import manhattan_similarity
 from models.base_model import SiameseNet
 
@@ -12,20 +13,11 @@ class LSTMBasedSiameseNet(SiameseNet):
 
     def siamese_layer(self, sequence_len, model_cfg):
         hidden_size = int(model_cfg['PARAMS']['hidden_size'])
+        cell_type = model_cfg['PARAMS']['cell_type']
 
-        fw_rnn_cell = tf.nn.rnn_cell.BasicLSTMCell(hidden_size)
-        bw_rnn_cell = tf.nn.rnn_cell.BasicLSTMCell(hidden_size)
+        outputs_sen1 = rnn_layer(self.embedded_x1, hidden_size, cell_type, reuse=False)
+        outputs_sen2 = rnn_layer(self.embedded_x2, hidden_size, cell_type)
 
-        outputs_sen1, _ = tf.nn.bidirectional_dynamic_rnn(fw_rnn_cell,
-                                                          bw_rnn_cell,
-                                                          self.embedded_x1,
-                                                          dtype=tf.float32)
-
-        tf.get_variable_scope().reuse_variables()
-        outputs_sen2, _ = tf.nn.bidirectional_dynamic_rnn(fw_rnn_cell,
-                                                          bw_rnn_cell,
-                                                          self.embedded_x2,
-                                                          dtype=tf.float32)
         out1 = tf.concat([outputs_sen1[0], outputs_sen1[1]], axis=2)
         out2 = tf.concat([outputs_sen2[0], outputs_sen2[1]], axis=2)
 
