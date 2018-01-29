@@ -15,9 +15,9 @@ class LSTMBasedSiameseNetTest(tf.test.TestCase):
             siamese_lstm_model.x2 = x2
             siamese_lstm_model.labels = [1.]
 
-            actual_pearson_coefficient = test_session.run(siamese_lstm_model.predictions)
-            correct_pearson_coefficient = tf.constant([.5])
-            self.assertEqual(actual_pearson_coefficient, correct_pearson_coefficient.eval())
+            actual_output = test_session.run(siamese_lstm_model.predictions)
+            correct_output = tf.constant([.5])
+            self.assertEqual(actual_output, correct_output.eval())
 
     def testSimilarity(self):
         with self.test_session() as test_session:
@@ -25,9 +25,9 @@ class LSTMBasedSiameseNetTest(tf.test.TestCase):
             x2 = np.array([3., 1., 5.])
             siamese_lstm_model = manhattan_similarity(x1, x2)
 
-            actual_pearson_coefficient = test_session.run(siamese_lstm_model)
-            correct_pearson_coefficient = tf.constant([.5])
-            self.assertEqual(actual_pearson_coefficient, correct_pearson_coefficient.eval())
+            actual_output = test_session.run(siamese_lstm_model)
+            correct_output = tf.constant([.5])
+            self.assertEqual(actual_output, correct_output.eval())
 
     def testSimilarity2D(self):
         with self.test_session() as test_session:
@@ -35,6 +35,6 @@ class LSTMBasedSiameseNetTest(tf.test.TestCase):
             x2 = np.array([[2., 2., 2.], [1., 1., 1.]])
             siamese_lstm_model = manhattan_similarity(x1, x2)
 
-            actual_pearson_coefficient = test_session.run(siamese_lstm_model)
-            correct_pearson_coefficient = tf.constant([.5])
-            self.assertEqual(actual_pearson_coefficient, correct_pearson_coefficient.eval())
+            actual_output = test_session.run(siamese_lstm_model)
+            correct_output = tf.constant([.5])
+            self.assertEqual(actual_output, correct_output.eval())
