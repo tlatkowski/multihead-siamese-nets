@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 
-def cnn_layer(embedded_x, max_seq_len, num_filters=200, filter_size=3, reuse=True):
+def cnn_layer(embedded_x, max_seq_len, num_filters, filter_size, reuse=False):
     embedding_dim = embedded_x.get_shape().as_list()[-1]
     embedded_x_expanded = tf.expand_dims(embedded_x, -1)
     with tf.variable_scope('convolution', reuse=reuse):
@@ -16,7 +16,7 @@ def cnn_layer(embedded_x, max_seq_len, num_filters=200, filter_size=3, reuse=Tru
     return pooling_flat
 
 
-def cnn_layers(embedded_x, max_seq_len, num_filters=[50, 50, 50], filter_sizes=[2, 3, 4], reuse=True):
+def cnn_layers(embedded_x, max_seq_len, num_filters, filter_sizes, reuse=False):
     pooled_flats = []
     for i, (n, size) in enumerate(zip(num_filters, filter_sizes)):
         with tf.variable_scope('cnn_layer_{}'.format(i), reuse=reuse):

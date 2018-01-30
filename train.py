@@ -53,11 +53,6 @@ def train(config, model, model_cfg):
 
         metrics = {'acc': 0.0}
         for epoch in tqdm(range(num_epochs), desc="Epochs"):
-            tqdm_iter = tqdm(range(num_batches),
-                                    total=num_batches,
-                                    desc="Batches",
-                                    leave=False,
-                                    postfix=metrics)
 
             train_sen1, train_sen2 = snli_dataset.train_instances(shuffle=True)
             train_labels = snli_dataset.train_labels()
@@ -66,6 +61,8 @@ def train(config, model, model_cfg):
             # small train set for measuring train accuracy
             eval_size = 1000
             val_sen1, val_sen2, val_labels = snli_dataset.validation_instances(eval_size)
+
+            tqdm_iter = tqdm(range(num_batches), total=num_batches, desc="Batches", leave=False, postfix=metrics)
 
             for batch in tqdm_iter:
                 global_step += 1
@@ -76,13 +73,15 @@ def train(config, model, model_cfg):
                 loss, _ = session.run([model.loss, model.opt], feed_dict=feed_dict)
                 if batch % eval_every == 0:
                     feed_dict = {model.x1: val_sen1, model.x2: val_sen2, model.labels: val_labels}
-                    train_accuracy, train_summary = session.run([model.accuracy, model.summary_op], feed_dict=feed_dict)
+                    train_accuracy, train_summary, loss = session.run([model.accuracy, model.summary_op, model.loss], feed_dict=feed_dict)
                     train_summary_writer.add_summary(train_summary, global_step)
 
                     feed_dict = {model.x1: test_sen1, model.x2: test_sen2, model.labels: test_labels}
                     test_accuracy, test_summary = session.run([model.accuracy, model.summary_op], feed_dict=feed_dict)
                     test_summary_writer.add_summary(test_summary, global_step)
-                    tqdm_iter.set_postfix(train_test_acc='{:.2f}|{:.2f}'.format(float(train_accuracy), float(test_accuracy)))
+                    tqdm_iter.set_postfix(train_test_acc='{:.2f}|{:.2f}'.format(float(train_accuracy), float(test_accuracy)),
+                                          loss='{:.2f}'.format(float(loss)),
+                                          epoch=epoch)
 
 
 def main():

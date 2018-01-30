@@ -17,12 +17,12 @@ class CnnSiameseNet(SiameseNet):
         out1 = cnn_layers(self.embedded_x1,
                           sequence_len,
                           num_filters=num_filters,
-                          filter_sizes=filter_sizes,
-                          reuse=False)
+                          filter_sizes=filter_sizes)
 
         out2 = cnn_layers(self.embedded_x2,
                           sequence_len,
                           num_filters=num_filters,
-                          filter_sizes=filter_sizes)
+                          filter_sizes=filter_sizes,
+                          reuse=True)
 
         return manhattan_similarity(out1, out2)

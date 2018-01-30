@@ -15,8 +15,8 @@ class LSTMBasedSiameseNet(SiameseNet):
         hidden_size = int(model_cfg['PARAMS']['hidden_size'])
         cell_type = model_cfg['PARAMS']['cell_type']
 
-        outputs_sen1 = rnn_layer(self.embedded_x1, hidden_size, cell_type, reuse=False)
-        outputs_sen2 = rnn_layer(self.embedded_x2, hidden_size, cell_type)
+        outputs_sen1 = rnn_layer(self.embedded_x1, hidden_size, cell_type)
+        outputs_sen2 = rnn_layer(self.embedded_x2, hidden_size, cell_type, reuse=True)
 
         out1 = tf.concat([outputs_sen1[0], outputs_sen1[1]], axis=2)
         out2 = tf.concat([outputs_sen2[0], outputs_sen2[1]], axis=2)

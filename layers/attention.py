@@ -2,17 +2,17 @@ import tensorflow as tf
 from layers.basics import linear, dropout, feed_forward, residual
 
 
-def stacked_multihead_attention(x, num_blocks, num_heads, reuse, use_residual=True):
+def stacked_multihead_attention(x, num_blocks, num_heads, use_residual, reuse=False):
     num_hiddens = x.get_shape().as_list()[-1]
     with tf.variable_scope('stacked_multihead_attention', reuse=reuse):
         for i in range(num_blocks):
             with tf.variable_scope('multihead_block_{}'.format(i), reuse=reuse):
-                x = multihead_attention(x, x, x, num_heads=num_heads, reuse=reuse)
+                x = multihead_attention(x, x, x, use_residual, num_heads=num_heads, reuse=reuse)
                 x = feed_forward(x, num_hiddens=num_hiddens, activation=tf.nn.relu, reuse=reuse)
     return x
 
 
-def multihead_attention(queries, keys, values, num_units=None, num_heads=8, reuse=True, use_residual=True):
+def multihead_attention(queries, keys, values, use_residual, num_units=None, num_heads=8, reuse=False):
     with tf.variable_scope('multihead-attention', reuse=reuse):
         if num_units is None:
             num_units = queries.get_shape().as_list()[-1]

@@ -6,7 +6,7 @@ rnn_cells = {
 }
 
 
-def rnn_layer(embedded_x, hidden_size, cell_type='GRU', reuse=True):
+def rnn_layer(embedded_x, hidden_size, cell_type='GRU', reuse=False):
     with tf.variable_scope('recurrent', reuse=reuse):
         cell = rnn_cells[cell_type]
 
