@@ -10,6 +10,8 @@ class SiameseNet:
         self.x2 = tf.placeholder(dtype=tf.int32, shape=[None, sequence_len])
         self.labels = tf.placeholder(dtype=tf.int32, shape=[None, 1])
 
+        self.debug = None
+
         self.embedding_size = int(main_cfg['PARAMS']['embedding_size'])
         self.learning_rate = float(main_cfg['TRAINING']['learning_rate'])
 

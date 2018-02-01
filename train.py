@@ -11,7 +11,6 @@ from models.lstm import LSTMBasedSiameseNet
 from models.multihead_attention import MultiheadAttentionSiameseNet
 
 
-# TODO make generic class
 models = {
     'cnn': CnnSiameseNet,
     'rnn': LSTMBasedSiameseNet,
@@ -52,7 +51,7 @@ def train(config, model, model_cfg):
         train_summary_writer = tf.summary.FileWriter(logs_path + 'train', graph=session.graph)
 
         metrics = {'acc': 0.0}
-        for epoch in tqdm(range(num_epochs), desc="Epochs"):
+        for epoch in tqdm(range(num_epochs), desc='Epochs'):
 
             train_sen1, train_sen2 = snli_dataset.train_instances(shuffle=True)
             train_labels = snli_dataset.train_labels()
@@ -73,9 +72,9 @@ def train(config, model, model_cfg):
                 loss, _ = session.run([model.loss, model.opt], feed_dict=feed_dict)
                 if batch % eval_every == 0:
                     feed_dict = {model.x1: val_sen1, model.x2: val_sen2, model.labels: val_labels}
-                    train_accuracy, train_summary, loss = session.run([model.accuracy, model.summary_op, model.loss], feed_dict=feed_dict)
+                    train_accuracy, train_summary, loss = session.run([model.accuracy, model.summary_op, model.loss],
+                                                                      feed_dict=feed_dict)
                     train_summary_writer.add_summary(train_summary, global_step)
-
                     feed_dict = {model.x1: test_sen1, model.x2: test_sen2, model.labels: test_labels}
                     test_accuracy, test_summary = session.run([model.accuracy, model.summary_op], feed_dict=feed_dict)
                     test_summary_writer.add_summary(test_summary, global_step)
@@ -88,9 +87,9 @@ def main():
 
     parser = ArgumentParser()
     parser.add_argument('model',
-                             default='multihead',
-                             choices=['rnn', 'cnn', 'multihead'],
-                             help='model used during training (default: %(default))')
+                        default='multihead',
+                        choices=['rnn', 'cnn', 'multihead'],
+                        help='model used during training (default: %(default))')
     args = parser.parse_args()
     main_config = configparser.ConfigParser()
     main_config.read('config/config.ini')
