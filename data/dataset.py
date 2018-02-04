@@ -1,17 +1,19 @@
-from data import data_loader
 import numpy as np
 
 
 class Dataset:
 
-    # def __init__(self, data_fn: str, num_tests: int):
-    def __init__(self, data_fn, num_tests):
+    def __init__(self, paraphrase_data, num_tests, batch_size):
+        self.sen1 = paraphrase_data.sen1
+        self.sen2 = paraphrase_data.sen2
+        self.labels = paraphrase_data.labels
+
         self.num_tests = num_tests
-        self.sen1, self.sen2, self.labels, self.max_doc_len, self.vocabulary_size = data_loader.load_snli(data_fn)
         self.__shuffle_train_idxs = range(len(self.labels) - num_tests)
         self.train_sen1 = self.sen1[:-self.num_tests]
         self.train_sen2 = self.sen2[:-self.num_tests]
         self._train_labels = self.labels[:-self.num_tests]
+        self.num_batches = (len(self.labels) - self.num_tests) // batch_size
 
     def train_instances(self, shuffle=False):
         if shuffle:
@@ -43,3 +45,5 @@ class Dataset:
         val_sen1, val_sen2 = train_sen1[val_idxs][:num_instances], train_sen2[val_idxs][:num_instances]
         val_labels = train_labels[val_idxs][:num_instances]
         return val_sen1, val_sen2, val_labels
+
+

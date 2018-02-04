@@ -20,7 +20,7 @@ Additionally, you need to have **git-lfs** installed to run model training on pr
 To train model run the following command:
 
 ```
-python3 train.py SELECTED_MODEL
+python3 run.py train SELECTED_MODEL
 ```
 
 where SELECTED_MODEL represents one of the selected model among:
@@ -43,14 +43,17 @@ num_epochs = 20
 batch_size = 256
 eval_every = 20
 learning_rate = 0.001
+checkpoints_to_keep = 10
+save_every = 200
 
 [DATA]
-file_name = train_snli.txt
+file_name = corpora/train_snli.txt
 num_tests = 1000
 logs_path = logs/
+model_dir = model_dir/
 
 [PARAMS]
-embedding_size = 128
+embedding_size = 64
 ```
 
 # Model configuration
@@ -73,6 +76,8 @@ filter_sizes = 2,3,4
 ```ini
 [PARAMS]
 hidden_size = 128
+cell_type = GRU
+bidirectional = True
 ```
 # Comparison of models
 To be done

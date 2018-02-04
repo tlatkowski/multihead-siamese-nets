@@ -2,14 +2,15 @@ import configparser
 import os
 from argparse import ArgumentParser
 
+import numpy as np
 import tensorflow as tf
+from tflearn.data_utils import VocabularyProcessor
 from tqdm import tqdm
-
+from data.data import ParaphraseData
 from data.dataset import Dataset
 from models.cnn import CnnSiameseNet
 from models.lstm import LSTMBasedSiameseNet
 from models.multihead_attention import MultiheadAttentionSiameseNet
-
 
 models = {
     'cnn': CnnSiameseNet,
@@ -18,37 +19,46 @@ models = {
 }
 
 
-def train(config, model, model_cfg):
+def train(config, model, model_cfg, model_name):
 
     num_epochs = int(config['TRAINING']['num_epochs'])
     batch_size = int(config['TRAINING']['batch_size'])
     eval_every = int(config['TRAINING']['eval_every'])
+    checkpoints_to_keep = int(config['TRAINING']['checkpoints_to_keep'])
+    save_every = int(config['TRAINING']['save_every'])
 
     num_tests = int(config['DATA']['num_tests'])
     data_fn = str(config['DATA']['file_name'])
     logs_path = str(config['DATA']['logs_path'])
+    model_dir = str(config['DATA']['model_dir'])
 
-    snli_dataset = Dataset(data_fn, num_tests)
-    max_doc_len = snli_dataset.max_doc_len
-    vocabulary_size = snli_dataset.vocabulary_size
+    paraphrase_data = ParaphraseData(model_dir, data_fn, force_save=True)
+    snli_dataset = Dataset(paraphrase_data, num_tests, batch_size)
+    max_sentence_len = paraphrase_data.max_sentence_len
+    vocabulary_size = paraphrase_data.vocabulary_size
 
     test_sen1, test_sen2 = snli_dataset.test_instances()
     test_labels = snli_dataset.test_labels()
 
-    num_batches = (len(snli_dataset.labels) - num_tests) // batch_size
+    num_batches = snli_dataset.num_batches
+
+    model = model(max_sentence_len, vocabulary_size, config, model_cfg)
+
+    model_saver = tf.train.Saver(max_to_keep=checkpoints_to_keep)
+    model_path = '{}/{}/model'.format(model_dir, model_name)
 
     with tf.Session() as session:
-        model = model(max_doc_len, vocabulary_size, config, model_cfg)
         global_step = 0
 
         init = tf.global_variables_initializer()
         init_local = tf.local_variables_initializer()
+
         session.run(init)
         session.run(init_local)
         if not os.path.isdir(logs_path):
             os.makedirs(logs_path)
-        test_summary_writer = tf.summary.FileWriter(logs_path + 'test', graph=session.graph)
-        train_summary_writer = tf.summary.FileWriter(logs_path + 'train', graph=session.graph)
+        test_summary_writer = tf.summary.FileWriter('{}/test/'.format(logs_path), graph=session.graph)
+        train_summary_writer = tf.summary.FileWriter('{}/train/'.format(logs_path), graph=session.graph)
 
         metrics = {'acc': 0.0}
         for epoch in tqdm(range(num_epochs), desc='Epochs'):
@@ -75,6 +85,7 @@ def train(config, model, model_cfg):
                     train_accuracy, train_summary, loss = session.run([model.accuracy, model.summary_op, model.loss],
                                                                       feed_dict=feed_dict)
                     train_summary_writer.add_summary(train_summary, global_step)
+
                     feed_dict = {model.x1: test_sen1, model.x2: test_sen2, model.labels: test_labels}
                     test_accuracy, test_summary = session.run([model.accuracy, model.summary_op], feed_dict=feed_dict)
                     test_summary_writer.add_summary(test_summary, global_step)
@@ -82,10 +93,46 @@ def train(config, model, model_cfg):
                                           loss='{:.2f}'.format(float(loss)),
                                           epoch=epoch)
 
+                if global_step % save_every == 0:
+                    model_saver.save(session, model_path, global_step=global_step)
+
+            model_saver.save(session, model_path, global_step=global_step)
+
+
+def predict(model_name, model, config, model_cfg):
+    model_dir = str(config['DATA']['model_dir'])
+
+    paraphrase_data = ParaphraseData(model_dir)
+
+    max_doc_len = paraphrase_data.max_sentence_len
+    vocabulary_size = paraphrase_data.vocabulary_size
+
+    model = model(max_doc_len, vocabulary_size, config, model_cfg)
+
+    with tf.Session() as session:
+        saver = tf.train.Saver()
+        last_checkpoint = tf.train.latest_checkpoint('{}/{}/model'.format(model_dir, model_name))
+        saver.restore(session, last_checkpoint)
+        while True:
+            x1 = input('First sentence:')
+            x2 = input('Second sentence:')
+            x1_sen = paraphrase_data.vectorize(x1)
+            x2_sen = paraphrase_data.vectorize(x2)
+
+            feed_dict = {model.x1: x1_sen, model.x2: x2_sen}
+            prediction = session.run([model.temp_sim], feed_dict=feed_dict)
+            print(prediction)
+
 
 def main():
 
     parser = ArgumentParser()
+
+    parser.add_argument('mode',
+                        default='train',
+                        choices=['train', 'predict'],
+                        help='model mode (default: %(default))')
+
     parser.add_argument('model',
                         default='multihead',
                         choices=['rnn', 'cnn', 'multihead'],
@@ -98,8 +145,11 @@ def main():
     model_cfg.read('config/model/{}.ini'.format(args.model))
 
     model = models[args.model]
-
-    train(main_config, model, model_cfg)
+    mode = args.mode
+    if 'train' in mode:
+        train(main_config, model, model_cfg, args.model)
+    else:
+        predict(args.model, model, main_config, model_cfg)
 
 
 if __name__ == '__main__':

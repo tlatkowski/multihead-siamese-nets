@@ -6,6 +6,7 @@ class SiameseNet:
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, sequence_len, vocabulary_size, main_cfg, model_cfg, loss_function):
+
         self.x1 = tf.placeholder(dtype=tf.int32, shape=[None, sequence_len])
         self.x2 = tf.placeholder(dtype=tf.int32, shape=[None, sequence_len])
         self.labels = tf.placeholder(dtype=tf.int32, shape=[None, 1])
@@ -32,6 +33,7 @@ class SiameseNet:
             self.correct_predictions = tf.equal(self.temp_sim, tf.to_float(self.labels))
             self.accuracy = tf.reduce_mean(tf.to_float(self.correct_predictions))
 
+        with tf.variable_scope('summary'):
             tf.summary.scalar("loss", self.loss)
             tf.summary.scalar("accuracy", self.accuracy)
             self.summary_op = tf.summary.merge_all()

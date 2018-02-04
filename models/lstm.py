@@ -18,11 +18,8 @@ class LSTMBasedSiameseNet(SiameseNet):
         outputs_sen1 = rnn_layer(self.embedded_x1, hidden_size, cell_type)
         outputs_sen2 = rnn_layer(self.embedded_x2, hidden_size, cell_type, reuse=True)
 
-        out1 = tf.concat([outputs_sen1[0], outputs_sen1[1]], axis=2)
-        out2 = tf.concat([outputs_sen2[0], outputs_sen2[1]], axis=2)
-
-        out1 = tf.reduce_mean(out1, axis=1)
-        out2 = tf.reduce_mean(out2, axis=1)
+        out1 = tf.reduce_mean(outputs_sen1, axis=1)
+        out2 = tf.reduce_mean(outputs_sen2, axis=1)
 
         return manhattan_similarity(out1, out2)
 
