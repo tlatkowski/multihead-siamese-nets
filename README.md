@@ -1,4 +1,6 @@
-# Siamese Deep Neural Networks for semantic similarity. 
+[![Build Status](https://travis-ci.org/tlatkowski/multihead-siamese-nets.svg?branch=master)](https://travis-ci.org/tlatkowski/multihead-siamese-nets)
+
+# Siamese Deep Neural Networks for semantic similarity.
 This repository contains implementation of Siamese Neural Networks in Tensorflow built based on 3 different and major deep learning architectures:
 - Convolutional Neural Networks
 - Recurrent Neural Networks
