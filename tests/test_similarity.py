@@ -4,7 +4,7 @@ import tensorflow as tf
 from models.lstm import manhattan_similarity
 
 
-class SimilarityTest(tf.test.TestCase):
+class TestSimilarity(tf.test.TestCase):
 
     def testManhattanSimilaritySame(self):
         with self.test_session() as test_session:

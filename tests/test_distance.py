@@ -4,7 +4,7 @@ import tensorflow as tf
 from layers.similarity import manhattan_distance, cosine_distance
 
 
-class DistanceTest(tf.test.TestCase):
+class TestDistance(tf.test.TestCase):
 
     def testManhattanDistance(self):
         with self.test_session() as test_session:
@@ -75,3 +75,7 @@ class DistanceTest(tf.test.TestCase):
             correct_output = [[1.], [-1.]]
 
             self.assertAllClose(actual_output, correct_output)
+
+
+if __name__ == '__main__':
+    tf.test.main()

@@ -3,7 +3,7 @@ import tensorflow as tf
 from layers.recurrent import rnn_layer
 
 
-class RNNTest(tf.test.TestCase):
+class TestRNN(tf.test.TestCase):
 
     def testRNNUnidirectionalNetwork(self):
         with self.test_session():
