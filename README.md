@@ -33,7 +33,7 @@ where SELECTED_MODEL represents one of the selected model among:
 Example:
 Run the following command to train Siamese Neural Network based on CNN:
 ```
-python3 train.py cnn
+python3 run.py train cnn
 ```
 
 # Training configuration
