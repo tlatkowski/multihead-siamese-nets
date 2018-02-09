@@ -103,3 +103,4 @@ ENV/
 logs
 model_dir
 .idea
+.pytest_cache

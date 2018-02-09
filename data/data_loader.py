@@ -1,9 +1,13 @@
 import numpy as np
 import pandas as pd
 from tflearn.data_utils import VocabularyProcessor
+import os
 
 
 def load_snli(data_fn, model_dir, save_vocab=True):
+    if not os.path.isdir(model_dir):
+        os.makedirs(model_dir)
+
     data = pd.read_csv(data_fn, delimiter='\t', header=None, names=['sen1', 'sen2', 'labels'], na_values='')
 
     X = data[['sen1', 'sen2']].as_matrix()

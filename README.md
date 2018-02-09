@@ -33,7 +33,7 @@ where SELECTED_MODEL represents one of the selected model among:
 Example:
 Run the following command to train Siamese Neural Network based on CNN:
 ```
-python3 train.py cnn
+python3 run.py train cnn
 ```
 
 # Training configuration
@@ -82,4 +82,14 @@ cell_type = GRU
 bidirectional = True
 ```
 # Comparison of models
-To be done
+Models are compared upon SNLI corpora.
+
+Experiment parameters:
+```ini
+Number of epochs : 20
+Batch size : 512
+Learning rate : 0.001
+
+Number of test instances : 50000
+Embedding size : 64
+```

@@ -2,15 +2,15 @@ import configparser
 import os
 from argparse import ArgumentParser
 
-import numpy as np
 import tensorflow as tf
-from tflearn.data_utils import VocabularyProcessor
 from tqdm import tqdm
+
 from data.data import ParaphraseData
 from data.dataset import Dataset
 from models.cnn import CnnSiameseNet
 from models.lstm import LSTMBasedSiameseNet
 from models.multihead_attention import MultiheadAttentionSiameseNet
+from utils.model_saver import ModelSaver
 
 models = {
     'cnn': CnnSiameseNet,
@@ -37,6 +37,8 @@ def train(config, model, model_cfg, model_name):
     max_sentence_len = paraphrase_data.max_sentence_len
     vocabulary_size = paraphrase_data.vocabulary_size
 
+    print(snli_dataset)
+
     test_sen1, test_sen2 = snli_dataset.test_instances()
     test_labels = snli_dataset.test_labels()
 
@@ -44,8 +46,7 @@ def train(config, model, model_cfg, model_name):
 
     model = model(max_sentence_len, vocabulary_size, config, model_cfg)
 
-    model_saver = tf.train.Saver(max_to_keep=checkpoints_to_keep)
-    model_path = '{}/{}/model'.format(model_dir, model_name)
+    model_saver = ModelSaver(model_dir, model_name, checkpoints_to_keep)
 
     with tf.Session() as session:
         global_step = 0
@@ -57,8 +58,8 @@ def train(config, model, model_cfg, model_name):
         session.run(init_local)
         if not os.path.isdir(logs_path):
             os.makedirs(logs_path)
-        test_summary_writer = tf.summary.FileWriter('{}/test/'.format(logs_path), graph=session.graph)
-        train_summary_writer = tf.summary.FileWriter('{}/train/'.format(logs_path), graph=session.graph)
+        test_summary_writer = tf.summary.FileWriter('{}/{}/test/'.format(logs_path, model_name), graph=session.graph)
+        train_summary_writer = tf.summary.FileWriter('{}/{}/train/'.format(logs_path, model_name), graph=session.graph)
 
         metrics = {'acc': 0.0}
         for epoch in tqdm(range(num_epochs), desc='Epochs'):
@@ -68,7 +69,7 @@ def train(config, model, model_cfg, model_name):
 
             # ++++++++
             # small train set for measuring train accuracy
-            eval_size = 1000
+            eval_size = 10000
             val_sen1, val_sen2, val_labels = snli_dataset.validation_instances(eval_size)
 
             tqdm_iter = tqdm(range(num_batches), total=num_batches, desc="Batches", leave=False, postfix=metrics)
@@ -94,9 +95,9 @@ def train(config, model, model_cfg, model_name):
                                           epoch=epoch)
 
                 if global_step % save_every == 0:
-                    model_saver.save(session, model_path, global_step=global_step)
+                    model_saver.save(session, global_step=global_step)
 
-            model_saver.save(session, model_path, global_step=global_step)
+            model_saver.save(session, global_step=global_step)
 
 
 def predict(model_name, model, config, model_cfg):
