@@ -24,5 +24,3 @@ def rnn_layer(embedded_x, hidden_size, bidirectional, cell_type='GRU', reuse=Fal
                                           embedded_x,
                                           dtype=tf.float32)
     return output
-
-

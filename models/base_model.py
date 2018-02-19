@@ -6,11 +6,11 @@ import tensorflow as tf
 class SiameseNet:
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, sequence_len, vocabulary_size, main_cfg, model_cfg, loss_function):
-
-        self.x1 = tf.placeholder(dtype=tf.int32, shape=[None, sequence_len])
-        self.x2 = tf.placeholder(dtype=tf.int32, shape=[None, sequence_len])
+    def __init__(self, max_sequence_len, vocabulary_size, main_cfg, model_cfg, loss_function):
+        self.x1 = tf.placeholder(dtype=tf.int32, shape=[None, max_sequence_len])
+        self.x2 = tf.placeholder(dtype=tf.int32, shape=[None, max_sequence_len])
         self.labels = tf.placeholder(dtype=tf.int32, shape=[None, 1])
+        self.sentences_lengths = tf.placeholder(dtype=tf.int32, shape=[None])
 
         self.debug = None
 
@@ -23,7 +23,7 @@ class SiameseNet:
             self.embedded_x2 = tf.gather(word_embeddings, self.x2)
 
         with tf.variable_scope('siamese'):
-            self.predictions = self.siamese_layer(sequence_len, model_cfg)
+            self.predictions = self.siamese_layer(max_sequence_len, model_cfg)
 
         with tf.variable_scope('loss'):
             self.loss = loss_function(self.labels, self.predictions)

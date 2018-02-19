@@ -48,5 +48,3 @@ def scaled_dot_product_attention(queries, keys, values, model_size=None, reuse=F
         attentions = tf.nn.softmax(Q_K)
         scaled_dprod_att = tf.matmul(attentions, values)
     return scaled_dprod_att, attentions
-
-

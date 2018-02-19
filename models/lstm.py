@@ -8,8 +8,8 @@ from models.base_model import SiameseNet
 
 class LSTMBasedSiameseNet(SiameseNet):
 
-    def __init__(self, sequence_len, vocabulary_size, main_cfg, model_cfg):
-        SiameseNet.__init__(self, sequence_len, vocabulary_size, main_cfg, model_cfg, mse)
+    def __init__(self, max_sequence_len, vocabulary_size, main_cfg, model_cfg):
+        SiameseNet.__init__(self, max_sequence_len, vocabulary_size, main_cfg, model_cfg, mse)
 
     def siamese_layer(self, sequence_len, model_cfg):
         hidden_size = int(model_cfg['PARAMS']['hidden_size'])
@@ -22,11 +22,3 @@ class LSTMBasedSiameseNet(SiameseNet):
         out2 = tf.reduce_mean(outputs_sen2, axis=1)
 
         return manhattan_similarity(out1, out2)
-
-
-
-
-
-
-
-

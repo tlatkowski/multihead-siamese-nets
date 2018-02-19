@@ -19,18 +19,17 @@ models = {
 }
 
 
-def train(config, model, model_cfg, model_name):
+def train(main_config, model, model_cfg, model_name):
+    num_epochs = int(main_config['TRAINING']['num_epochs'])
+    batch_size = int(main_config['TRAINING']['batch_size'])
+    eval_every = int(main_config['TRAINING']['eval_every'])
+    checkpoints_to_keep = int(main_config['TRAINING']['checkpoints_to_keep'])
+    save_every = int(main_config['TRAINING']['save_every'])
 
-    num_epochs = int(config['TRAINING']['num_epochs'])
-    batch_size = int(config['TRAINING']['batch_size'])
-    eval_every = int(config['TRAINING']['eval_every'])
-    checkpoints_to_keep = int(config['TRAINING']['checkpoints_to_keep'])
-    save_every = int(config['TRAINING']['save_every'])
-
-    num_tests = int(config['DATA']['num_tests'])
-    data_fn = str(config['DATA']['file_name'])
-    logs_path = str(config['DATA']['logs_path'])
-    model_dir = str(config['DATA']['model_dir'])
+    num_tests = int(main_config['DATA']['num_tests'])
+    data_fn = str(main_config['DATA']['file_name'])
+    logs_path = str(main_config['DATA']['logs_path'])
+    model_dir = str(main_config['DATA']['model_dir'])
 
     paraphrase_data = ParaphraseData(model_dir, data_fn, force_save=True)
     snli_dataset = Dataset(paraphrase_data, num_tests, batch_size)
@@ -44,7 +43,7 @@ def train(config, model, model_cfg, model_name):
 
     num_batches = snli_dataset.num_batches
 
-    model = model(max_sentence_len, vocabulary_size, config, model_cfg)
+    model = model(max_sentence_len, vocabulary_size, main_config, model_cfg)
 
     model_saver = ModelSaver(model_dir, model_name, checkpoints_to_keep)
 
@@ -78,7 +77,7 @@ def train(config, model, model_cfg, model_name):
                 global_step += 1
                 x1_batch = train_sen1[batch * batch_size:(batch + 1) * batch_size]
                 x2_batch = train_sen2[batch * batch_size:(batch + 1) * batch_size]
-                y_batch = train_labels[batch * batch_size:(batch+1) * batch_size]
+                y_batch = train_labels[batch * batch_size:(batch + 1) * batch_size]
                 feed_dict = {model.x1: x1_batch, model.x2: x2_batch, model.labels: y_batch}
                 loss, _ = session.run([model.loss, model.opt], feed_dict=feed_dict)
                 if batch % eval_every == 0:
@@ -90,9 +89,10 @@ def train(config, model, model_cfg, model_name):
                     feed_dict = {model.x1: test_sen1, model.x2: test_sen2, model.labels: test_labels}
                     test_accuracy, test_summary = session.run([model.accuracy, model.summary_op], feed_dict=feed_dict)
                     test_summary_writer.add_summary(test_summary, global_step)
-                    tqdm_iter.set_postfix(train_test_acc='{:.2f}|{:.2f}'.format(float(train_accuracy), float(test_accuracy)),
-                                          loss='{:.2f}'.format(float(loss)),
-                                          epoch=epoch)
+                    tqdm_iter.set_postfix(
+                        train_test_acc='{:.2f}|{:.2f}'.format(float(train_accuracy), float(test_accuracy)),
+                        loss='{:.2f}'.format(float(loss)),
+                        epoch=epoch)
 
                 if global_step % save_every == 0:
                     model_saver.save(session, global_step=global_step)
@@ -126,7 +126,6 @@ def predict(model_name, model, config, model_cfg):
 
 
 def main():
-
     parser = ArgumentParser()
 
     parser.add_argument('mode',
@@ -147,12 +146,15 @@ def main():
 
     model = models[args.model]
     mode = args.mode
+
+    model_name = '{}_{}_masking{}'.format(args.model,
+                                          main_config['PARAMS']['embedding_size'],
+                                          main_config['PARAMS']['loss_masking'])
     if 'train' in mode:
-        train(main_config, model, model_cfg, args.model)
+        train(main_config, model, model_cfg, model_name)
     else:
-        predict(args.model, model, main_config, model_cfg)
+        predict(model_name, model, main_config, model_cfg)
 
 
 if __name__ == '__main__':
     main()
-

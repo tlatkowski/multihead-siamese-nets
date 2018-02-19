@@ -41,5 +41,3 @@ def cosine_distance(x1, x2):
     denom = tf.sqrt(tf.reduce_sum(tf.square(x1), axis=1)) * tf.sqrt(tf.reduce_sum(tf.square(x2), axis=1))
     cos_sim = tf.expand_dims(tf.div(num, denom), -1)
     return cos_sim
-
-

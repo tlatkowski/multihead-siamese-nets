@@ -14,7 +14,7 @@ def _contrastive_plus(model_energy):
 
 def _contrastive_minus(model_energy, margin=tf.constant(0.5)):
     mask = tf.to_float(tf.less(tf.to_float(model_energy), margin))
-    return mask*tf.square(tf.to_float(model_energy))
+    return mask * tf.square(tf.to_float(model_energy))
 
 
 def cross_entropy(predictions, labels):

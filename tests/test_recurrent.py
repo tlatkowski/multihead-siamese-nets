@@ -21,4 +21,4 @@ class TestRNN(tf.test.TestCase):
             rnn_output = rnn_layer(embedded_x, hidden_size, bidirectional=True)
 
             actual_output = rnn_output.get_shape().as_list()[-1]
-            self.assertEqual(actual_output, 2*hidden_size)
+            self.assertEqual(actual_output, 2 * hidden_size)

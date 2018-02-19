@@ -47,11 +47,9 @@ class Dataset:
         return val_sen1, val_sen2, val_labels
 
     def __str__(self):
-        test_train_ratio = self.num_tests/len(self.labels)
+        test_train_ratio = self.num_tests / len(self.labels)
         return 'Dataset properties:\n ' \
                'Number of training instances: {}\n ' \
                'Number of test instances: {}\n' \
-               'Test/Train ratio: {}'\
+               'Test/Train ratio: {}' \
             .format(len(self.labels), self.num_tests, test_train_ratio)
-
-

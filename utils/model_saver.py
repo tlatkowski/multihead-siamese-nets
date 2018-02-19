@@ -1,10 +1,11 @@
-import tensorflow as tf
 import os
+
+import tensorflow as tf
 
 
 class ModelSaver:
 
-    def __init__(self, model_dir, model_name, checkpoints_to_keep):
+    def __init__(self, model_dir, model_name, checkpoints_to_keep=10):
         self.model_saver = tf.train.Saver(max_to_keep=checkpoints_to_keep)
         self.model_path = '{}/{}/model'.format(model_dir, model_name)
         if not os.path.isdir(model_dir):

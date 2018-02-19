@@ -7,8 +7,8 @@ from utils.config_helpers import parse_list
 
 class CnnSiameseNet(SiameseNet):
 
-    def __init__(self, sequence_len, vocabulary_size, main_cfg, model_cfg):
-        SiameseNet.__init__(self, sequence_len, vocabulary_size, main_cfg, model_cfg, mse)
+    def __init__(self, max_sequence_len, vocabulary_size, main_cfg, model_cfg):
+        SiameseNet.__init__(self, max_sequence_len, vocabulary_size, main_cfg, model_cfg, mse)
 
     def siamese_layer(self, sequence_len, model_cfg):
         num_filters = parse_list(model_cfg['PARAMS']['num_filters'])

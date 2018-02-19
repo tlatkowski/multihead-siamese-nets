@@ -25,7 +25,7 @@ def residual(x_in, x_out, reuse=False):
     return res_con
 
 
-def normalization(x, eps=1e-8): # FIXME
+def normalization(x, eps=1e-8):  # FIXME
     with tf.variable_scope('norm'):
         inputs_shape = x.get_shape()
         params_shape = inputs_shape[-1:]
