@@ -147,9 +147,8 @@ def main():
     model = models[args.model]
     mode = args.mode
 
-    model_name = '{}_{}_masking{}'.format(args.model,
-                                          main_config['PARAMS']['embedding_size'],
-                                          main_config['PARAMS']['loss_masking'])
+    model_name = '{}_{}'.format(args.model,
+                                          main_config['PARAMS']['embedding_size'])
     if 'train' in mode:
         train(main_config, model, model_cfg, model_name)
     else:
