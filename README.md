@@ -86,12 +86,24 @@ Models are compared upon SNLI corpora.
 
 Experiment parameters:
 ```ini
-Number of epochs : 20
+Number of epochs : 10
 Batch size : 512
 Learning rate : 0.001
 
+Number of train instances : 367373
 Number of test instances : 50000
 Embedding size : 64
 ```
 
-TBD
+Specific hyperparameters of models:
+
+CNN | RNN | Multihead
+------------ | ------------- | -------------
+num_filters = 50,50,50 | num_blocks = 2 | hidden_size = 128
+filter_sizes = 2,3,4 | num_heads = 8 | cell_type = GRU
+ | use_residual = False | bidirectional = True
+
+
+
+
+
