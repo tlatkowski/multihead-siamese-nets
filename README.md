@@ -99,9 +99,9 @@ Specific hyperparameters of models:
 
 CNN | RNN | Multihead
 ------------ | ------------- | -------------
-num_filters = 50,50,50 | num_blocks = 2 | hidden_size = 128
-filter_sizes = 2,3,4 | num_heads = 8 | cell_type = GRU
- | use_residual = False | bidirectional = True
+num_filters = 50,50,50 | hidden_size = 128 | num_blocks = 2
+filter_sizes = 2,3,4 | cell_type = GRU | num_heads = 8
+- | bidirectional = True | use_residual = False
 
 
 
