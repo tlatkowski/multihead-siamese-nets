@@ -1,5 +1,4 @@
 import configparser
-import os
 from argparse import ArgumentParser
 
 import tensorflow as tf
@@ -10,6 +9,7 @@ from data.dataset import Dataset
 from models.cnn import CnnSiameseNet
 from models.lstm import LSTMBasedSiameseNet
 from models.multihead_attention import MultiheadAttentionSiameseNet
+from utils.log_saver import LogSaver
 from utils.model_saver import ModelSaver
 
 models = {
@@ -55,10 +55,8 @@ def train(main_config, model, model_cfg, model_name):
 
         session.run(init)
         session.run(init_local)
-        if not os.path.isdir(logs_path):
-            os.makedirs(logs_path)
-        test_summary_writer = tf.summary.FileWriter('{}/{}/test/'.format(logs_path, model_name), graph=session.graph)
-        train_summary_writer = tf.summary.FileWriter('{}/{}/train/'.format(logs_path, model_name), graph=session.graph)
+
+        log_saver = LogSaver(logs_path, model_name, session.graph)
 
         metrics = {'acc': 0.0}
         for epoch in tqdm(range(num_epochs), desc='Epochs'):
@@ -84,11 +82,12 @@ def train(main_config, model, model_cfg, model_name):
                     feed_dict = {model.x1: val_sen1, model.x2: val_sen2, model.labels: val_labels}
                     train_accuracy, train_summary, loss = session.run([model.accuracy, model.summary_op, model.loss],
                                                                       feed_dict=feed_dict)
-                    train_summary_writer.add_summary(train_summary, global_step)
+                    log_saver.log_train(train_summary, global_step)
 
                     feed_dict = {model.x1: test_sen1, model.x2: test_sen2, model.labels: test_labels}
                     test_accuracy, test_summary = session.run([model.accuracy, model.summary_op], feed_dict=feed_dict)
-                    test_summary_writer.add_summary(test_summary, global_step)
+                    log_saver.log_test(test_summary, global_step)
+
                     tqdm_iter.set_postfix(
                         train_test_acc='{:.2f}|{:.2f}'.format(float(train_accuracy), float(test_accuracy)),
                         loss='{:.2f}'.format(float(loss)),
