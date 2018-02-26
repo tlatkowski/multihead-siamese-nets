@@ -35,6 +35,10 @@ def manhattan_distance(x1, x2):
     return tf.reduce_sum(tf.abs(x1 - x2), axis=1, keep_dims=True)
 
 
+def euclidean_distance(x1, x2):
+    return tf.sqrt(tf.reduce_sum(tf.square(x1 - x2)))
+
+
 def cosine_distance(x1, x2):
     # TODO consider adding for case when input vector contains only 0 values, eps = 1e-08
     num = tf.reduce_sum(x1 * x2, axis=1)
