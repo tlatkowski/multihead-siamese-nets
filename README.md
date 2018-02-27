@@ -104,7 +104,7 @@ filter_sizes = 2,3,4 | cell_type = GRU | num_heads = 8
 |  | bidirectional = True | use_residual = False
 
 
-Reference-style: 
+Evaluation results: 
 ![alt text][results]
 
 
