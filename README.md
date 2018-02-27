@@ -104,6 +104,9 @@ filter_sizes = 2,3,4 | cell_type = GRU | num_heads = 8
 |  | bidirectional = True | use_residual = False
 
 
+Reference-style: 
+![alt text][results]
 
 
+[results]: https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/results.png "Evaluation results"
 
