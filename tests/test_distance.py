@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from layers.similarity import manhattan_distance, cosine_distance
+from layers.similarity import manhattan_distance, cosine_distance, euclidean_distance
 
 
 class TestDistance(tf.test.TestCase):
@@ -75,6 +75,16 @@ class TestDistance(tf.test.TestCase):
             correct_output = [[1.], [-1.]]
 
             self.assertAllClose(actual_output, correct_output)
+
+    def testEuclideanDistance(self):
+        with self.test_session() as test_session:
+            x1 = np.array([[3., 1.]])
+            x2 = np.array([[1., 1.]])
+
+            actual_output = test_session.run(euclidean_distance(x1, x2))
+            correct_output = [2.]
+
+            self.assertEqual(actual_output, correct_output)
 
 
 if __name__ == '__main__':

@@ -36,7 +36,7 @@ def manhattan_distance(x1, x2):
 
 
 def euclidean_distance(x1, x2):
-    return tf.sqrt(tf.reduce_sum(tf.square(x1 - x2)))
+    return tf.sqrt(tf.reduce_sum(tf.square(x1 - x2), axis=1, keep_dims=True))
 
 
 def cosine_distance(x1, x2):

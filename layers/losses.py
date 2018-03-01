@@ -1,5 +1,6 @@
 import tensorflow as tf
-from layers.similarity import euclidean_distance
+from layers.similarity import manhattan_distance
+
 
 def contrastive(predictions, labels):
     contrastive_loss_minus = tf.to_float(labels) * _contrastive_plus(predictions)
@@ -28,7 +29,8 @@ def mse(predictions, labels):
     return tf.losses.mean_squared_error(labels, predictions)
 
 
-def contrastive_lecun(x1, x2, labels, margin=0.2):
-    c_loss = (1 - labels) * 0.5 * tf.square(euclidean_distance(x1, x2)) +\
-             labels * 0.5 * tf.square(tf.maximum(0, margin - euclidean_distance(x1, x2)))
-    return c_loss
+def contrastive_lecun(x1, x2, labels, margin=0.2, distance=manhattan_distance):
+    labels = tf.to_float(labels)
+    c_loss = labels * 0.5 * tf.square(distance(x1, x2)) +\
+             (1 - labels) * 0.5 * tf.square(tf.maximum(0.0, margin - distance(x1, x2)))
+    return tf.reduce_sum(c_loss)
