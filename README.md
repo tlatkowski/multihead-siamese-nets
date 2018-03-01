@@ -31,7 +31,7 @@ Additionally, you need to have **git-lfs** installed to run model training on pr
 To train model run the following command:
 
 ```
-python3 run.py train SELECTED_MODEL
+python3 run.py train SELECTED_MODEL --gpu GPU_NUMBER
 ```
 
 where SELECTED_MODEL represents one of the selected model among:
@@ -39,14 +39,21 @@ where SELECTED_MODEL represents one of the selected model among:
 - rnn
 - multihead
 
-Example:
+**--gpu** is an optional argument, use it in order to indicate specific GPU on your machine (the default value is '0').
+
+Example (GPU usage):
+Run the following command to train Siamese Neural Network based on CNN:
+```
+python3 run.py train cnn --gpu 1
+```
+
+Example (CPU usage):
 Run the following command to train Siamese Neural Network based on CNN:
 ```
 python3 run.py train cnn
 ```
-
 # Training configuration
-This repository contains main configuration training file placed in 'config/config.ini'.
+This repository contains main configuration training file placed in 'config/main.ini'.
 
 ```ini
 [TRAINING]
