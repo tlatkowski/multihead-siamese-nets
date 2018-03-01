@@ -11,11 +11,20 @@ The main reason of creating this repository is to compare well-known implementai
 # Installation
 This project was developed in and has been tested on Python 3.5. The package requirements are stored in requirements.txt file.
 
-To install the requirements:
+To install the requirements, execute the following command:
 
 ```
-pip install -r requirements.txt
+pip install -r requirements/requirements.txt
 ```
+For GPU usage, execute:
+```
+pip install -r requirements/requirements-gpu.txt
+```
+and for CPU usage:
+```
+pip install -r requirements/requirements-cpu.txt
+```
+
 Additionally, you need to have **git-lfs** installed to run model training on predefined corpora.
 
 # Running models
