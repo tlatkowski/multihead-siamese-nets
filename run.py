@@ -137,6 +137,7 @@ def train(main_config, model, model_cfg, model_name):
             model_saver.save(session, global_step=global_step)
 
         print(test_acc_per_epoch)
+        print(time_per_epoch)
 
 
 def predict(model_name, model, config, model_cfg):
@@ -186,7 +187,7 @@ def main():
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
     main_config = configparser.ConfigParser()
-    main_config.read('config/config.ini')
+    main_config.read('config/main.ini')
 
     model_cfg = configparser.ConfigParser()
     model_cfg.read('config/model/{}.ini'.format(args.model))
