@@ -13,18 +13,14 @@ from models.lstm import LSTMBasedSiameseNet
 from models.multihead_attention import MultiheadAttentionSiameseNet
 from utils.log_saver import LogSaver
 from utils.model_saver import ModelSaver
+from utils.other_utils import timer, evaluate_model
+from utils.batch_helper import BatchHelper
 
 models = {
     'cnn': CnnSiameseNet,
     'rnn': LSTMBasedSiameseNet,
     'multihead': MultiheadAttentionSiameseNet
 }
-
-
-def timer(start, end):
-    hours, rem = divmod(end - start, 3600)
-    minutes, seconds = divmod(rem, 60)
-    return "{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds)
 
 
 def train(main_config, model, model_cfg, model_name):
@@ -78,6 +74,7 @@ def train(main_config, model, model_cfg, model_name):
             train_sen1, train_sen2 = snli_dataset.train_instances(shuffle=True)
             train_labels = snli_dataset.train_labels()
 
+            train_batch_helper = BatchHelper(train_sen1, train_sen2, train_labels, batch_size)
             # ++++++++
             # small eval set for measuring train accuracy
             val_sen1, val_sen2, val_labels = snli_dataset.validation_instances(eval_size)
@@ -86,9 +83,7 @@ def train(main_config, model, model_cfg, model_name):
 
             for batch in tqdm_iter:
                 global_step += 1
-                x1_batch = train_sen1[batch * batch_size:(batch + 1) * batch_size]
-                x2_batch = train_sen2[batch * batch_size:(batch + 1) * batch_size]
-                y_batch = train_labels[batch * batch_size:(batch + 1) * batch_size]
+                x1_batch, x2_batch, y_batch = train_batch_helper.next(batch)
                 feed_dict = {model.x1: x1_batch, model.x2: x2_batch, model.labels: y_batch}
                 loss, _ = session.run([model.loss, model.opt], feed_dict=feed_dict)
 
@@ -117,18 +112,8 @@ def train(main_config, model, model_cfg, model_name):
                 if global_step % save_every == 0:
                     model_saver.save(session, global_step=global_step)
 
-            # eval entire test set
-            split_size = 100
-            num_test_batches = len(test_sen1) // split_size
-            all_test_accuracy = 0.0
-            for b_id in range(num_test_batches):
-                feed_dict = {model.x1: test_sen1[b_id * split_size: (b_id + 1) * split_size],
-                             model.x2: test_sen2[b_id * split_size: (b_id + 1) * split_size],
-                             model.labels: test_labels[b_id * split_size: (b_id + 1) * split_size]}
-                all_test_accuracy += session.run(model.accuracy, feed_dict=feed_dict)
-
-            all_test_accuracy /= num_test_batches
-            test_acc_per_epoch.append(all_test_accuracy)
+            test_accuracy = evaluate_model(model, session, test_sen1, test_sen2, test_labels)
+            test_acc_per_epoch.append(test_accuracy)
 
             end_time = time.time()
             total_time = timer(start_time, end_time)
@@ -169,18 +154,16 @@ def main():
     parser = ArgumentParser()
 
     parser.add_argument('mode',
-                        default='train',
                         choices=['train', 'predict'],
-                        help='model mode (default: %(default))')
+                        help='pipeline mode')
 
     parser.add_argument('model',
-                        default='multihead',
                         choices=['rnn', 'cnn', 'multihead'],
-                        help='model used during training (default: %(default))')
+                        help='model to be used')
 
     parser.add_argument('--gpu',
                         default='0',
-                        help='index of GPU to be used')
+                        help='index of GPU to be used (default: %(default))')
 
     args = parser.parse_args()
 
