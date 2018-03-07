@@ -37,3 +37,7 @@ def normalization(x, eps=1e-8):  # FIXME
         outputs = gamma * normalized + beta
 
     return outputs
+
+
+def optimize(loss, learning_rate=0.001):
+    return tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss)

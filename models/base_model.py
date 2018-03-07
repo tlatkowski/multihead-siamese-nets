@@ -1,6 +1,7 @@
 import abc
 
 import tensorflow as tf
+from layers.basics import optimize
 
 
 class SiameseNet:
@@ -14,8 +15,8 @@ class SiameseNet:
 
         self.debug = None
 
-        self.embedding_size = int(main_cfg['PARAMS']['embedding_size'])
-        self.learning_rate = float(main_cfg['TRAINING']['learning_rate'])
+        self.embedding_size = main_cfg['PARAMS'].getint('embedding_size')
+        self.learning_rate = main_cfg['TRAINING'].getfloat('learning_rate')
 
         with tf.variable_scope('embeddings'):
             word_embeddings = tf.get_variable('word_embeddings', [vocabulary_size, self.embedding_size])
@@ -27,7 +28,7 @@ class SiameseNet:
 
         with tf.variable_scope('loss'):
             self.loss = loss_function(self.labels, self.predictions)
-            self.opt = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
+            self.opt = optimize(self.loss, self.learning_rate)
 
         with tf.variable_scope('metrics'):
             self.temp_sim = tf.rint(self.predictions)

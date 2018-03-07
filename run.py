@@ -15,6 +15,7 @@ from utils.log_saver import LogSaver
 from utils.model_saver import ModelSaver
 from utils.other_utils import timer, evaluate_model
 from utils.batch_helper import BatchHelper
+from utils.config_helpers import MainConfig
 
 models = {
     'cnn': CnnSiameseNet,
@@ -24,21 +25,11 @@ models = {
 
 
 def train(main_config, model, model_cfg, model_name):
-    num_epochs = int(main_config['TRAINING']['num_epochs'])
-    batch_size = int(main_config['TRAINING']['batch_size'])
-    eval_every = int(main_config['TRAINING']['eval_every'])
-    checkpoints_to_keep = int(main_config['TRAINING']['checkpoints_to_keep'])
-    save_every = int(main_config['TRAINING']['save_every'])
-    eval_size = int(main_config['TRAINING']['eval_size'])
-    log_device_placement = bool(main_config['TRAINING']['log_device_placement'])
 
-    num_tests = int(main_config['DATA']['num_tests'])
-    data_fn = str(main_config['DATA']['file_name'])
-    logs_path = str(main_config['DATA']['logs_path'])
-    model_dir = str(main_config['DATA']['model_dir'])
+    main_cfg = MainConfig(main_config)
 
-    paraphrase_data = ParaphraseData(model_dir, data_fn, force_save=True)
-    snli_dataset = Dataset(paraphrase_data, num_tests, batch_size)
+    paraphrase_data = ParaphraseData(main_cfg.model_dir, main_cfg.data_fn, force_save=True)
+    snli_dataset = Dataset(paraphrase_data, main_cfg.num_tests, main_cfg.batch_size)
     max_sentence_len = paraphrase_data.max_sentence_len
     vocabulary_size = paraphrase_data.vocabulary_size
 
@@ -51,9 +42,9 @@ def train(main_config, model, model_cfg, model_name):
 
     model = model(max_sentence_len, vocabulary_size, main_config, model_cfg)
 
-    model_saver = ModelSaver(model_dir, model_name, checkpoints_to_keep)
+    model_saver = ModelSaver(main_cfg.model_dir, model_name, main_cfg.checkpoints_to_keep)
 
-    config = tf.ConfigProto(allow_soft_placement=True, log_device_placement=log_device_placement)
+    config = tf.ConfigProto(allow_soft_placement=True, log_device_placement=main_cfg.log_device_placement)
 
     with tf.Session(config=config) as session:
         global_step = 0
@@ -62,22 +53,22 @@ def train(main_config, model, model_cfg, model_name):
 
         session.run(init)
 
-        log_saver = LogSaver(logs_path, model_name, session.graph)
+        log_saver = LogSaver(main_cfg.logs_path, model_name, session.graph)
 
         metrics = {'acc': 0.0}
 
         test_acc_per_epoch = []
         time_per_epoch = []
-        for epoch in tqdm(range(num_epochs), desc='Epochs'):
+        for epoch in tqdm(range(main_cfg.num_epochs), desc='Epochs'):
             start_time = time.time()
 
             train_sen1, train_sen2 = snli_dataset.train_instances(shuffle=True)
             train_labels = snli_dataset.train_labels()
 
-            train_batch_helper = BatchHelper(train_sen1, train_sen2, train_labels, batch_size)
+            train_batch_helper = BatchHelper(train_sen1, train_sen2, train_labels, main_cfg.batch_size)
             # ++++++++
             # small eval set for measuring train accuracy
-            val_sen1, val_sen2, val_labels = snli_dataset.validation_instances(eval_size)
+            val_sen1, val_sen2, val_labels = snli_dataset.validation_instances(main_cfg.eval_size)
 
             tqdm_iter = tqdm(range(num_batches), total=num_batches, desc="Batches", leave=False, postfix=metrics)
 
@@ -87,7 +78,7 @@ def train(main_config, model, model_cfg, model_name):
                 feed_dict = {model.x1: x1_batch, model.x2: x2_batch, model.labels: y_batch}
                 loss, _ = session.run([model.loss, model.opt], feed_dict=feed_dict)
 
-                if batch % eval_every == 0:
+                if batch % main_cfg.eval_every == 0:
                     feed_dict = {model.x1: val_sen1, model.x2: val_sen2, model.labels: val_labels}
                     train_accuracy, train_summary, loss = session.run([model.accuracy, model.summary_op, model.loss],
                                                                       feed_dict=feed_dict)
@@ -109,7 +100,7 @@ def train(main_config, model, model_cfg, model_name):
                         loss='{:.2f}'.format(float(loss)),
                         epoch=epoch)
 
-                if global_step % save_every == 0:
+                if global_step % main_cfg.save_every == 0:
                     model_saver.save(session, global_step=global_step)
 
             test_accuracy = evaluate_model(model, session, test_sen1, test_sen2, test_labels)

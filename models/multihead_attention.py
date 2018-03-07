@@ -12,9 +12,9 @@ class MultiheadAttentionSiameseNet(SiameseNet):
         SiameseNet.__init__(self, max_sequence_len, vocabulary_size, main_cfg, model_cfg, mse)
 
     def siamese_layer(self, sequence_len, model_cfg):
-        num_blocks = int(model_cfg['PARAMS']['num_blocks'])
-        num_heads = int(model_cfg['PARAMS']['num_heads'])
-        use_residual = bool(model_cfg['PARAMS']['use_residual'])
+        num_blocks = model_cfg['PARAMS'].getint('num_blocks')
+        num_heads = model_cfg['PARAMS'].getint('num_heads')
+        use_residual = model_cfg['PARAMS'].getboolean('use_residual')
 
         out1, self.debug = stacked_multihead_attention(self.embedded_x1,
                                                        num_blocks=num_blocks,
