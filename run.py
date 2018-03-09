@@ -8,20 +8,12 @@ from tqdm import tqdm
 
 from data.data import ParaphraseData
 from data.dataset import Dataset
-from models.cnn import CnnSiameseNet
-from models.lstm import LSTMBasedSiameseNet
-from models.multihead_attention import MultiheadAttentionSiameseNet
+from models.model_type import MODELS
+from utils.batch_helper import BatchHelper
+from utils.config_helpers import MainConfig
 from utils.log_saver import LogSaver
 from utils.model_saver import ModelSaver
 from utils.other_utils import timer, evaluate_model
-from utils.batch_helper import BatchHelper
-from utils.config_helpers import MainConfig
-
-models = {
-    'cnn': CnnSiameseNet,
-    'rnn': LSTMBasedSiameseNet,
-    'multihead': MultiheadAttentionSiameseNet
-}
 
 
 def train(main_config, model, model_cfg, model_name):
@@ -166,7 +158,7 @@ def main():
     model_cfg = configparser.ConfigParser()
     model_cfg.read('config/model/{}.ini'.format(args.model))
 
-    model = models[args.model]
+    model = MODELS[args.model]
     mode = args.mode
 
     model_name = '{}_{}'.format(args.model,
