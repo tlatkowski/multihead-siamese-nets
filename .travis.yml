@@ -3,3 +3,5 @@ python:
   - "3.5"
 script:
   - pytest
+install:
+  - pip install -r requirements/requirements-cpu.txt
