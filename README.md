@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/tlatkowski/multihead-siamese-nets.svg?style=plastic?branch=master)](https://travis-ci.org/tlatkowski/multihead-siamese-nets)![](https://img.shields.io/badge/Python-3.6-brightgreen.svg) ![](https://img.shields.io/badge/TensorFlow-1.3.0-yellowgreen.svg)
+[![Build Status](https://travis-ci.org/tlatkowski/multihead-siamese-nets.svg?style=plastic?branch=master)](https://travis-ci.org/tlatkowski/multihead-siamese-nets)![](https://img.shields.io/badge/Python-3.6-brightgreen.svg) ![](https://img.shields.io/badge/TensorFlow-1.3.0-blue.svg)
 
 # Siamese Deep Neural Networks for semantic similarity.
 This repository contains implementation of Siamese Neural Networks in Tensorflow built based on 3 different and major deep learning architectures:
@@ -13,9 +13,6 @@ This project was developed in and has been tested on Python 3.6. The package req
 
 To install the requirements, execute the following command:
 
-```
-pip install -r requirements/requirements.txt
-```
 For GPU usage, execute:
 ```
 pip install -r requirements/requirements-gpu.txt
@@ -26,6 +23,11 @@ pip install -r requirements/requirements-cpu.txt
 ```
 
 Additionally, you need to have **git-lfs** installed to run model training on predefined corpora.
+
+After installing git lfs, execute the following command in order to pull datasets:
+```
+git lfs pull
+```
 
 # Running models
 To train model run the following command:
@@ -56,22 +58,26 @@ python3 run.py train cnn
 This repository contains main configuration training file placed in 'config/main.ini'.
 
 ```ini
+
 [TRAINING]
-num_epochs = 20
-batch_size = 256
+num_epochs = 10
+batch_size = 512
 eval_every = 20
 learning_rate = 0.001
 checkpoints_to_keep = 10
-save_every = 200
+save_every = 100
+eval_size = 5000
+log_device_placement = false
 
 [DATA]
 file_name = corpora/train_snli.txt
-num_tests = 1000
-logs_path = logs/
-model_dir = model_dir/
+num_tests = 50000
+logs_path = logs
+model_dir = model_dir
 
 [PARAMS]
 embedding_size = 64
+loss_function = mse
 ```
 
 # Model configuration
@@ -109,6 +115,7 @@ Learning rate : 0.001
 Number of train instances : 367373
 Number of test instances : 50000
 Embedding size : 64
+Loss function: mean squared error
 ```
 
 Specific hyperparameters of models:
