@@ -1,35 +1,54 @@
+import logging
 import os
 
 import numpy as np
 import pandas as pd
 from tflearn.data_utils import VocabularyProcessor
+from enum import Enum
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+
+class ColumnType(Enum):
+    sentence1 = 0,
+    sentence2 = 1,
+    labels = 2
 
 
 def load_snli(data_fn, model_dir, save_vocab=True):
     if not os.path.isdir(model_dir):
         os.makedirs(model_dir)
 
-    data = pd.read_csv(data_fn, delimiter='\t', header=None, names=['sen1', 'sen2', 'labels'], na_values='')
+    logger.info('Loading corpus from {}'.format(model_dir))
+    corpus = pd.read_csv(data_fn, delimiter='\t', header=None,
+                         names=['sen1', 'sen2', 'labels'], na_values='')
+    logger.info('Loaded corpus from {}'.format(model_dir))
+    raw_sentence_pairs = corpus[['sen1', 'sen2']].as_matrix()
+    sen1, sen2, vocab_processor, sen_lengths = vectorize_data(raw_sentence_pairs, model_dir, save_vocab)
+    labels = corpus['labels'].as_matrix()
+    labels = np.reshape(labels, (-1, 1))
+    return sen1, sen2, labels, vocab_processor, sen_lengths
 
-    X = data[['sen1', 'sen2']].as_matrix()
-    num_instances, num_classes = X.shape
-    X = X.ravel()
-    X = [str(x) for x in list(X)]
-    sen_lengths = [len(str(x).split(' ')) for x in list(X)]
+
+def vectorize_data(raw_sentence_pairs, model_dir, save_vocab=True):
+    num_instances, num_classes = raw_sentence_pairs.shape
+    raw_sentence_pairs = raw_sentence_pairs.ravel()
+
+    raw_sentence_pairs = [str(x) for x in list(raw_sentence_pairs)]
+    sen_lengths = [len(str(x).split(' ')) for x in list(raw_sentence_pairs)]
     max_sen_len = max(sen_lengths)
     vocab_processor = VocabularyProcessor(max_sen_len)
-    vec_X = np.array(list(vocab_processor.fit_transform(X)))
+    vec_X = np.array(list(vocab_processor.fit_transform(raw_sentence_pairs)))
 
     if save_vocab:
         vocab_processor.save('{}/vocab'.format(model_dir))
 
     vec_X = vec_X.reshape(num_instances, num_classes, max_sen_len)
 
-    sen1 = vec_X[:, 0, :]
-    sen2 = vec_X[:, 1, :]
-    labels = data['labels'].as_matrix()
-    labels = np.reshape(labels, (-1, 1))
-    return sen1, sen2, labels, vocab_processor, sen_lengths
+    vectorized_sentence1 = vec_X[:, 0, :]
+    vectorized_sentence2 = vec_X[:, 1, :]
+    return vectorized_sentence1, vectorized_sentence2, vocab_processor, sen_lengths
 
 
 def data_split():

@@ -1,4 +1,70 @@
+from enum import Enum
+
 import numpy as np
+import pandas as pd
+
+
+class DatasetType(Enum):
+    SNLI = 0,
+    QQP = 1
+
+
+class DatasetExperiment:
+
+    def __init__(self, data_dir, num_tests, batch_size):
+        self.data_dir = data_dir
+        self.num_tests = num_tests
+        self.batch_size = batch_size
+
+    def train(self):
+        raise NotImplementedError
+
+    def dev(self):
+        raise NotImplementedError
+
+    def test(self):
+        raise NotImplementedError
+
+
+class QQPDataset(DatasetExperiment):
+
+    def __init__(self, *args):
+        super().__init__(args)
+        self.train = pd.read_csv('{}{}'.format(self.data_dir, 'train.csv'),
+                                 sep=',',
+                                 usecols=['question1', 'question2', 'is_duplicate'])
+        self.test = pd.read_csv('{}{}'.format(self.data_dir, 'test.csv'), sep=',')
+
+    def train(self):
+        pass
+
+    def dev(self):
+        pass
+
+    def test(self):
+        pass
+
+
+class SNLIDataset(DatasetExperiment):
+
+    def __init__(self, *args):
+        super().__init__(args)
+        self.train = pd.read_csv('{}{}'.format(self.data_dir, 'train_snli.csv'), sep=',')
+
+    def train(self):
+        pass
+
+    def dev(self):
+        pass
+
+    def test(self):
+        pass
+
+
+DATASETS = {
+    DatasetType.QQP: QQPDataset,
+    DatasetType.SNLI: SNLIDataset
+}
 
 
 class Dataset:
