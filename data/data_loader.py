@@ -1,10 +1,11 @@
 import logging
 import os
+from enum import Enum
 
 import numpy as np
 import pandas as pd
-from tflearn.data_utils import VocabularyProcessor
-from enum import Enum
+
+from data.data_utils import vectorize_data
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -16,39 +17,24 @@ class ColumnType(Enum):
     labels = 2
 
 
+columns = [ColumnType.sentence1.name,
+           ColumnType.sentence2.name,
+           ColumnType.labels.name]
+
+
 def load_snli(data_fn, model_dir, save_vocab=True):
     if not os.path.isdir(model_dir):
         os.makedirs(model_dir)
 
     logger.info('Loading corpus from {}'.format(model_dir))
     corpus = pd.read_csv(data_fn, delimiter='\t', header=None,
-                         names=['sen1', 'sen2', 'labels'], na_values='')
+                         names=columns, na_values='')
     logger.info('Loaded corpus from {}'.format(model_dir))
-    raw_sentence_pairs = corpus[['sen1', 'sen2']].as_matrix()
+    raw_sentence_pairs = corpus[columns[:2]].as_matrix()
     sen1, sen2, vocab_processor, sen_lengths = vectorize_data(raw_sentence_pairs, model_dir, save_vocab)
-    labels = corpus['labels'].as_matrix()
+    labels = corpus[columns[-1]].as_matrix()
     labels = np.reshape(labels, (-1, 1))
     return sen1, sen2, labels, vocab_processor, sen_lengths
-
-
-def vectorize_data(raw_sentence_pairs, model_dir, save_vocab=True):
-    num_instances, num_classes = raw_sentence_pairs.shape
-    raw_sentence_pairs = raw_sentence_pairs.ravel()
-
-    raw_sentence_pairs = [str(x) for x in list(raw_sentence_pairs)]
-    sen_lengths = [len(str(x).split(' ')) for x in list(raw_sentence_pairs)]
-    max_sen_len = max(sen_lengths)
-    vocab_processor = VocabularyProcessor(max_sen_len)
-    vec_X = np.array(list(vocab_processor.fit_transform(raw_sentence_pairs)))
-
-    if save_vocab:
-        vocab_processor.save('{}/vocab'.format(model_dir))
-
-    vec_X = vec_X.reshape(num_instances, num_classes, max_sen_len)
-
-    vectorized_sentence1 = vec_X[:, 0, :]
-    vectorized_sentence2 = vec_X[:, 1, :]
-    return vectorized_sentence1, vectorized_sentence2, vocab_processor, sen_lengths
 
 
 def data_split():

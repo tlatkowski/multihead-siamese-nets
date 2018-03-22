@@ -49,7 +49,7 @@ class SNLIDataset(DatasetExperiment):
 
     def __init__(self, *args):
         super().__init__(args)
-        self.train = pd.read_csv('{}{}'.format(self.data_dir, 'train_snli.csv'), sep=',')
+        self.dataset = pd.read_csv('{}{}'.format(self.data_dir, 'train_snli.csv'), sep=',')
 
     def train(self):
         pass
