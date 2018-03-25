@@ -6,8 +6,8 @@ from argparse import ArgumentParser
 import tensorflow as tf
 from tqdm import tqdm
 
-from data.data import ParaphraseData
-from data.dataset import Dataset
+from data.data_utils import DatasetVectorizer
+from data.dataset import Dataset, DATASETS
 from models.model_type import MODELS
 from utils.batch_helper import BatchHelper
 from utils.config_helpers import MainConfig
@@ -16,23 +16,27 @@ from utils.model_saver import ModelSaver
 from utils.other_utils import timer, evaluate_model
 
 
-def train(main_config, model, model_cfg, model_name):
+def train(main_config, model_config, model_name, dataset_name):
 
     main_cfg = MainConfig(main_config)
+    model = MODELS[model_name]
+    dataset = DATASETS[dataset_name]()
 
-    paraphrase_data = ParaphraseData(main_cfg.model_dir, main_cfg.data_fn, force_save=True)
-    snli_dataset = Dataset(paraphrase_data, main_cfg.num_tests, main_cfg.batch_size)
-    max_sentence_len = paraphrase_data.max_sentence_len
-    vocabulary_size = paraphrase_data.vocabulary_size
+    train_data = dataset.train_set_pairs()
+    vectorizer = DatasetVectorizer(train_data, main_cfg.model_dir)
 
-    print(snli_dataset)
+    dataset_helper = Dataset(vectorizer, dataset, main_cfg.batch_size)
+    max_sentence_len = vectorizer.max_sentence_len
+    vocabulary_size = vectorizer.vocabulary_size
 
-    test_sen1, test_sen2 = snli_dataset.test_instances()
-    test_labels = snli_dataset.test_labels()
+    # print(snli_dataset)
 
-    num_batches = snli_dataset.num_batches
+    test_sen1, test_sen2 = dataset_helper.test_instances()
+    test_labels = dataset_helper.test_labels()
+    test_labels = test_labels.reshape(-1, 1)
+    num_batches = dataset_helper.num_batches
 
-    model = model(max_sentence_len, vocabulary_size, main_config, model_cfg)
+    model = model(max_sentence_len, vocabulary_size, main_config, model_config)
 
     model_saver = ModelSaver(main_cfg.model_dir, model_name, main_cfg.checkpoints_to_keep)
 
@@ -40,28 +44,23 @@ def train(main_config, model, model_cfg, model_name):
 
     with tf.Session(config=config) as session:
         global_step = 0
-
         init = tf.global_variables_initializer()
-
         session.run(init)
-
         log_saver = LogSaver(main_cfg.logs_path, model_name, session.graph)
-
         metrics = {'acc': 0.0}
-
         test_acc_per_epoch = []
         time_per_epoch = []
         for epoch in tqdm(range(main_cfg.num_epochs), desc='Epochs'):
             start_time = time.time()
 
-            train_sen1, train_sen2 = snli_dataset.train_instances(shuffle=True)
-            train_labels = snli_dataset.train_labels()
+            train_sen1, train_sen2 = dataset_helper.train_instances(shuffle=True)
+            train_labels = dataset_helper.train_labels()
 
             train_batch_helper = BatchHelper(train_sen1, train_sen2, train_labels, main_cfg.batch_size)
-            # ++++++++
-            # small eval set for measuring train accuracy
-            val_sen1, val_sen2, val_labels = snli_dataset.validation_instances(main_cfg.eval_size)
 
+            # small eval set for measuring train accuracy
+            val_sen1, val_sen2, val_labels = dataset_helper.dev_instances()
+            val_labels = val_labels.reshape(-1, 1)
             tqdm_iter = tqdm(range(num_batches), total=num_batches, desc="Batches", leave=False, postfix=metrics)
 
             for batch in tqdm_iter:
@@ -76,11 +75,6 @@ def train(main_config, model, model_cfg, model_name):
                                                                       feed_dict=feed_dict)
                     log_saver.log_train(train_summary, global_step)
 
-                    test_small_batch = 5000
-
-                    # feed_dict = {model.x1: test_sen1[:test_small_batch],
-                    #              model.x2: test_sen2[:test_small_batch],
-                    #              model.labels: test_labels[:test_small_batch]}
                     feed_dict = {model.x1: test_sen1,
                                  model.x2: test_sen2,
                                  model.labels: test_labels}
@@ -108,15 +102,19 @@ def train(main_config, model, model_cfg, model_name):
         print(time_per_epoch)
 
 
-def predict(model_name, model, config, model_cfg):
-    model_dir = str(config['DATA']['model_dir'])
+def predict(main_config, model_config, model):
 
-    paraphrase_data = ParaphraseData(model_dir)
+    model_name = '{}_{}'.format(model,
+                                main_config['PARAMS']['embedding_size'])
+    model = MODELS[model_name]
+    model_dir = str(main_config['DATA']['model_dir'])
 
-    max_doc_len = paraphrase_data.max_sentence_len
-    vocabulary_size = paraphrase_data.vocabulary_size
+    vectorizer = DatasetVectorizer(model_dir)
 
-    model = model(max_doc_len, vocabulary_size, config, model_cfg)
+    max_doc_len = vectorizer.max_sentence_len
+    vocabulary_size = vectorizer.vocabulary_size
+
+    model = model(max_doc_len, vocabulary_size, main_config, model_config)
 
     with tf.Session() as session:
         saver = tf.train.Saver()
@@ -125,8 +123,8 @@ def predict(model_name, model, config, model_cfg):
         while True:
             x1 = input('First sentence:')
             x2 = input('Second sentence:')
-            x1_sen = paraphrase_data.vectorize(x1)
-            x2_sen = paraphrase_data.vectorize(x2)
+            x1_sen = vectorizer.vectorize(x1)
+            x2_sen = vectorizer.vectorize(x2)
 
             feed_dict = {model.x1: x1_sen, model.x2: x2_sen}
             prediction = session.run([model.temp_sim], feed_dict=feed_dict)
@@ -144,6 +142,10 @@ def main():
                         choices=['rnn', 'cnn', 'multihead'],
                         help='model to be used')
 
+    parser.add_argument('dataset',
+                        choices=['QQP', 'SNLI'],
+                        help='dataset to be used')
+
     parser.add_argument('--gpu',
                         default='0',
                         help='index of GPU to be used (default: %(default))')
@@ -155,18 +157,15 @@ def main():
     main_config = configparser.ConfigParser()
     main_config.read('config/main.ini')
 
-    model_cfg = configparser.ConfigParser()
-    model_cfg.read('config/model/{}.ini'.format(args.model))
+    model_config = configparser.ConfigParser()
+    model_config.read('config/model/{}.ini'.format(args.model))
 
-    model = MODELS[args.model]
     mode = args.mode
 
-    model_name = '{}_{}'.format(args.model,
-                                main_config['PARAMS']['embedding_size'])
     if 'train' in mode:
-        train(main_config, model, model_cfg, model_name)
+        train(main_config, model_config, args.model, args.dataset)
     else:
-        predict(model_name, model, main_config, model_cfg)
+        predict(main_config, model_config, args.model)
 
 
 if __name__ == '__main__':

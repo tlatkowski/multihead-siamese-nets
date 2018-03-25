@@ -9,77 +9,167 @@ class DatasetType(Enum):
     QQP = 1
 
 
+class ColumnType(Enum):
+    sentence1 = 0,
+    sentence2 = 1,
+    labels = 2
+
+
+columns = [ColumnType.sentence1.name,
+           ColumnType.sentence2.name,
+           ColumnType.labels.name]
+
+
 class DatasetExperiment:
 
-    def __init__(self, data_dir, num_tests, batch_size):
-        self.data_dir = data_dir
-        self.num_tests = num_tests
-        self.batch_size = batch_size
+    def __init__(self, dev_ratio=0.01, test_ratio=0.01):
+        self.data_dir = self._data_path()
+        self.dev_ratio = dev_ratio
+        self.test_ratio = test_ratio
 
-    def train(self):
+    def train_set(self):
         raise NotImplementedError
 
-    def dev(self):
+    def train_set_pairs(self):
         raise NotImplementedError
 
-    def test(self):
+    def train_labels(self):
+        raise NotImplementedError
+
+    def dev_set(self):
+        raise NotImplementedError
+
+    def dev_set_pairs(self):
+        raise NotImplementedError
+
+    def dev_labels(self):
+        raise NotImplementedError
+
+    def test_set(self):
+        raise NotImplementedError
+
+    def test_set_pairs(self):
+        raise NotImplementedError
+
+    def test_labels(self):
+        raise NotImplementedError
+
+    def _data_path(self):
         raise NotImplementedError
 
 
 class QQPDataset(DatasetExperiment):
 
     def __init__(self, *args):
-        super().__init__(args)
-        self.train = pd.read_csv('{}{}'.format(self.data_dir, 'train.csv'),
-                                 sep=',',
-                                 usecols=['question1', 'question2', 'is_duplicate'])
-        self.test = pd.read_csv('{}{}'.format(self.data_dir, 'test.csv'), sep=',')
+        super().__init__(*args)
+        dataset = pd.read_csv('{}{}'.format(self.data_dir, 'train.csv'),
+                              sep=',',
+                              usecols=['question1', 'question2', 'is_duplicate'])
+        dataset.dropna(inplace=True)
+        num_instances = len(dataset)
+        self.num_train = num_instances * (1 - self.dev_ratio - self.test_ratio)
+        self.num_dev = num_instances * self.dev_ratio
+        self.num_test = num_instances * self.test_ratio
+        self.train = dataset.loc[:self.num_train]
+        self.dev = dataset.loc[self.num_train:self.num_train + self.num_dev]
+        self.test = dataset.loc[self.num_train + self.num_dev:self.num_train + self.num_dev + self.num_test]
 
-    def train(self):
-        pass
+    def train_set(self):
+        return self.train
 
-    def dev(self):
-        pass
+    def train_set_pairs(self):
+        return self.train[['question1', 'question2']].as_matrix()
 
-    def test(self):
-        pass
+    def train_labels(self):
+        return self.train['is_duplicate'].as_matrix()
+
+    def dev_set(self):
+        return self.dev
+
+    def dev_set_pairs(self):
+        return self.dev[['question1', 'question2']].as_matrix()
+
+    def dev_labels(self):
+        return self.dev['is_duplicate'].as_matrix()
+
+    def test_set(self):
+        return self.test
+
+    def test_set_pairs(self):
+        return self.test[['question1', 'question2']].as_matrix()
+
+    def test_labels(self):
+        return self.test['is_duplicate'].as_matrix()
+
+    def _data_path(self):
+        return 'corpora/QQP/'
 
 
 class SNLIDataset(DatasetExperiment):
 
     def __init__(self, *args):
-        super().__init__(args)
-        self.dataset = pd.read_csv('{}{}'.format(self.data_dir, 'train_snli.csv'), sep=',')
+        super().__init__(*args)
+        dataset = pd.read_csv('{}{}'.format(self.data_dir, 'train_snli.txt'),
+                              delimiter='\t', header=None, names=columns, na_values='')
+        dataset.dropna(inplace=True)
+        num_instances = len(dataset)
+        self.num_train = num_instances * (1 - self.dev_ratio - self.test_ratio)
+        self.num_dev = num_instances * self.dev_ratio
+        self.num_test = num_instances * self.test_ratio
+        self.train = dataset.loc[:self.num_train]
+        self.dev = dataset.loc[self.num_train:self.num_train + self.num_dev]
+        self.test = dataset.loc[self.num_train + self.num_dev:self.num_train + self.num_dev + self.num_test]
 
-    def train(self):
-        pass
+    def train_set(self):
+        return self.train
 
-    def dev(self):
-        pass
+    def train_set_pairs(self):
+        return self.train[[ColumnType.sentence1.name, ColumnType.sentence2.name]].as_matrix()
 
-    def test(self):
-        pass
+    def train_labels(self):
+        return self.train[ColumnType.labels.name].as_matrix()
+
+    def dev_set(self):
+        return self.dev
+
+    def dev_set_pairs(self):
+        return self.dev[[ColumnType.sentence1.name, ColumnType.sentence2.name]].as_matrix()
+
+    def dev_labels(self):
+        return self.dev[ColumnType.labels.name].as_matrix()
+
+    def test_set(self):
+        return self.test
+
+    def test_set_pairs(self):
+        return self.test[[ColumnType.sentence1.name, ColumnType.sentence2.name]].as_matrix()
+
+    def test_labels(self):
+        return self.test[ColumnType.labels.name].as_matrix()
+
+    def _data_path(self):
+        return 'corpora/SNLI/'
 
 
 DATASETS = {
-    DatasetType.QQP: QQPDataset,
-    DatasetType.SNLI: SNLIDataset
+    DatasetType.QQP.name: QQPDataset,
+    DatasetType.SNLI.name: SNLIDataset
 }
 
 
 class Dataset:
 
-    def __init__(self, paraphrase_data, num_tests, batch_size):
-        self.sen1 = paraphrase_data.sen1
-        self.sen2 = paraphrase_data.sen2
-        self.labels = paraphrase_data.labels
+    def __init__(self, vectorizer, dataset, batch_size):
 
-        self.num_tests = num_tests
-        self.__shuffle_train_idxs = range(len(self.labels) - num_tests)
-        self.train_sen1 = self.sen1[:-self.num_tests]
-        self.train_sen2 = self.sen2[:-self.num_tests]
-        self._train_labels = self.labels[:-self.num_tests]
-        self.num_batches = (len(self.labels) - self.num_tests) // batch_size
+        self.train_sen1, self.train_sen2 = vectorizer.vectorize_2d(dataset.train_set_pairs())
+        self.dev_sen1, self.dev_sen2 = vectorizer.vectorize_2d(dataset.dev_set_pairs())
+        self.test_sen1, self.test_sen2 = vectorizer.vectorize_2d(dataset.test_set_pairs())
+        self.num_tests = len(dataset.test_set())
+        self._train_labels = dataset.train_labels()
+        self._dev_labels = dataset.dev_labels()
+        self._test_labels = dataset.test_labels()
+        self.__shuffle_train_idxs = range(len(self._train_labels))
+        self.num_batches = len(self._train_labels) // batch_size
 
     def train_instances(self, shuffle=False):
         if shuffle:
@@ -93,29 +183,17 @@ class Dataset:
         return self._train_labels
 
     def test_instances(self):
-        test_sen1 = self.sen1[-self.num_tests:]
-        test_sen2 = self.sen2[-self.num_tests:]
-        return test_sen1, test_sen2
+        return self.test_sen1, self.test_sen2
 
     def test_labels(self):
-        return self.labels[-self.num_tests:]
+        return self._test_labels
 
-    def validation_instances(self, num_instances=None):
-        if num_instances is None:
-            num_instances = len(self.__shuffle_train_idxs)  # get all training instances for validation
-
-        val_idxs = np.random.permutation(range(len(self.__shuffle_train_idxs)))
-        train_sen1, train_sen2 = self.train_instances(shuffle=False)
-        train_labels = self.train_labels()
-
-        val_sen1, val_sen2 = train_sen1[val_idxs][:num_instances], train_sen2[val_idxs][:num_instances]
-        val_labels = train_labels[val_idxs][:num_instances]
-        return val_sen1, val_sen2, val_labels
+    def dev_instances(self):
+        return self.dev_sen1, self.dev_sen2, self._dev_labels
 
     def __str__(self):
-        test_train_ratio = self.num_tests / len(self.labels)
         return 'Dataset properties:\n ' \
                'Number of training instances: {}\n ' \
+               'Number of dev instances: {}\n ' \
                'Number of test instances: {}\n' \
-               'Test/Train ratio: {}' \
-            .format(len(self.labels), self.num_tests, test_train_ratio)
+            .format(len(self._train_labels), len(self._dev_labels), len(self._test_labels))

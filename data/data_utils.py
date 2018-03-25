@@ -1,23 +1,53 @@
-from tflearn.data_utils import VocabularyProcessor
+import logging
+
 import numpy as np
+from tflearn.data_utils import VocabularyProcessor
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
-def vectorize_data(raw_sentence_pairs, model_dir, save_vocab=True):
-    num_instances, num_classes = raw_sentence_pairs.shape
-    raw_sentence_pairs = raw_sentence_pairs.ravel()
+class DatasetVectorizer:
 
-    raw_sentence_pairs = [str(x) for x in list(raw_sentence_pairs)]
-    sentences_lengths = [len(str(x).split(' ')) for x in list(raw_sentence_pairs)]
-    max_sentence_length = max(sentences_lengths)
-    vocabulary = VocabularyProcessor(max_sentence_length)
-    vectorized_sentence_pairs = np.array(list(vocabulary.fit_transform(raw_sentence_pairs)))
+    def __init__(self, raw_sentence_pairs, model_dir, save_vocab=True):
+        raw_sentence_pairs = raw_sentence_pairs.ravel()
+        raw_sentence_pairs = [str(x) for x in list(raw_sentence_pairs)]
+        self.sentences_lengths = [len(str(x).split(' ')) for x in list(raw_sentence_pairs)]
+        max_sentence_length = max(self.sentences_lengths)
+        self.vocabulary = VocabularyProcessor(max_sentence_length)
 
-    if save_vocab:
-        vocabulary.save('{}/vocab'.format(model_dir))
+        if save_vocab:
+            self.vocabulary.save('{}/vocab'.format(model_dir))
 
-    vectorized_sentence_pairs = vectorized_sentence_pairs.reshape(num_instances, num_classes, max_sentence_length)
+    @property
+    def max_sentence_len(self):
+        return self.vocabulary.max_document_length
 
-    vectorized_sentence1 = vectorized_sentence_pairs[:, 0, :]
-    vectorized_sentence2 = vectorized_sentence_pairs[:, 1, :]
-    return vectorized_sentence1, vectorized_sentence2, vocabulary, sentences_lengths
+    @property
+    def vocabulary_size(self):
+        return len(self.vocabulary.vocabulary_._mapping)
+
+    def restore(self):
+        self.vocabulary = VocabularyProcessor.restore('{}/vocab'.format(self.model_dir))
+
+    def vectorize(self, sentence):
+        return np.array(list(self.vocabulary.transform([sentence])))
+
+    def vectorize_2d(self, raw_sentence_pairs):
+        num_instances, num_classes = raw_sentence_pairs.shape
+        raw_sentence_pairs = raw_sentence_pairs.ravel()
+
+        for i, v in enumerate(raw_sentence_pairs):
+            if v is np.nan:
+                print(i, v)
+
+        vectorized_sentence_pairs = np.array(list(self.vocabulary.transform(raw_sentence_pairs)))
+
+        vectorized_sentence_pairs = vectorized_sentence_pairs.reshape(num_instances, num_classes,
+                                                                      self.max_sentence_len)
+
+        vectorized_sentence1 = vectorized_sentence_pairs[:, 0, :]
+        vectorized_sentence2 = vectorized_sentence_pairs[:, 1, :]
+        return vectorized_sentence1, vectorized_sentence2
+
 
