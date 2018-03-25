@@ -8,16 +8,21 @@ This repository contains implementation of Siamese Neural Networks in Tensorflow
 
 The main reason of creating this repository is to compare well-known implementaions of Siamese Neural Networks available on GitHub mainly built upon CNN and RNN architectures with Siamese Neural Network built based on multihead attention mechanism originally proposed in Transformer model from [Attention is all you need](https://papers.nips.cc/paper/7181-attention-is-all-you-need.pdf) paper.
 
+# Supported datasets
+Current version of pipeline supports working with 2 datasets:
+- [The Stanford Natural Language Inference (SNLI) Corpus](https://nlp.stanford.edu/projects/snli/)
+- [Quora Question Pairs](https://www.kaggle.com/c/quora-question-pairs)
+
 # Installation
-This project was developed in and has been tested on Python 3.6. The package requirements are stored in requirements.txt file.
+This project was developed in and has been tested on Python 3.6. The package requirements are stored in **requirements** folder.
 
 To install the requirements, execute the following command:
 
-For GPU usage, execute:
+For **GPU** usage, execute:
 ```
 pip install -r requirements/requirements-gpu.txt
 ```
-and for CPU usage:
+and for **CPU** usage:
 ```
 pip install -r requirements/requirements-cpu.txt
 ```
@@ -33,29 +38,33 @@ git lfs pull
 To train model run the following command:
 
 ```
-python3 run.py train SELECTED_MODEL --gpu GPU_NUMBER
+python3 run.py train SELECTED_MODEL SELECTED_DATASET --gpu GPU_NUMBER
 ```
 
-where SELECTED_MODEL represents one of the selected model among:
+where **SELECTED_MODEL** represents one of the selected model among:
 - cnn
 - rnn
 - multihead
 
+and **SELECTED_DATASET** is represented by:
+- SNLI
+- QQP
+
 **--gpu** is an optional argument, use it in order to indicate specific GPU on your machine (the default value is '0').
 
 Example (GPU usage):
-Run the following command to train Siamese Neural Network based on CNN:
+Run the following command to train Siamese Neural Network based on CNN and trained on SNLI corpus:
 ```
-python3 run.py train cnn --gpu 1
+python3 run.py train cnn SNLI --gpu 1
 ```
 
 Example (CPU usage):
 Run the following command to train Siamese Neural Network based on CNN:
 ```
-python3 run.py train cnn
+python3 run.py train cnn SNLI
 ```
 # Training configuration
-This repository contains main configuration training file placed in 'config/main.ini'.
+This repository contains main configuration training file placed in **'config/main.ini'**.
 
 ```ini
 
