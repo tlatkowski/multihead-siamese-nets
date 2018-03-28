@@ -1,4 +1,5 @@
 import logging
+import os
 
 import numpy as np
 from tflearn.data_utils import VocabularyProcessor
@@ -10,6 +11,7 @@ logger.setLevel(logging.INFO)
 class DatasetVectorizer:
 
     def __init__(self, raw_sentence_pairs, model_dir, save_vocab=True):
+        os.makedirs(model_dir, exist_ok=True)
         raw_sentence_pairs = raw_sentence_pairs.ravel()
         raw_sentence_pairs = [str(x) for x in list(raw_sentence_pairs)]
         self.sentences_lengths = [len(str(x).split(' ')) for x in list(raw_sentence_pairs)]

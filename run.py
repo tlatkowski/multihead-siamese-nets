@@ -6,18 +6,17 @@ from argparse import ArgumentParser
 import tensorflow as tf
 from tqdm import tqdm
 
-from data.data_utils import DatasetVectorizer
+from utils.data_utils import DatasetVectorizer
 from data.dataset import Dataset, DATASETS
 from models.model_type import MODELS
 from utils.batch_helper import BatchHelper
 from utils.config_helpers import MainConfig
 from utils.log_saver import LogSaver
 from utils.model_saver import ModelSaver
-from utils.other_utils import timer, evaluate_model
+from utils.other_utils import timer, evaluate_model, save_model_eval
 
 
 def train(main_config, model_config, model_name, dataset_name):
-
     main_cfg = MainConfig(main_config)
     model = MODELS[model_name]
     dataset = DATASETS[dataset_name]()
@@ -46,7 +45,7 @@ def train(main_config, model_config, model_name, dataset_name):
         global_step = 0
         init = tf.global_variables_initializer()
         session.run(init)
-        log_saver = LogSaver(main_cfg.logs_path, model_name, session.graph)
+        log_saver = LogSaver(main_cfg.logs_path, model_name, dataset_name, session.graph)
         metrics = {'acc': 0.0}
         test_acc_per_epoch = []
         time_per_epoch = []
@@ -98,8 +97,9 @@ def train(main_config, model_config, model_name, dataset_name):
 
             model_saver.save(session, global_step=global_step)
 
-        print(test_acc_per_epoch)
-        print(time_per_epoch)
+        save_model_eval('{}/{}'.format(main_cfg.model_dir, model_name), sum(test_acc_per_epoch)/len(test_acc_per_epoch),
+                        test_acc_per_epoch[-1],
+                        time_per_epoch[-1])
 
 
 def predict(main_config, model_config, model):
