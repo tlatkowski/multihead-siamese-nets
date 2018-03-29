@@ -66,6 +66,7 @@ class QQPDataset(DatasetExperiment):
                               sep=',',
                               usecols=['question1', 'question2', 'is_duplicate'])
         dataset.dropna(inplace=True)
+        dataset = dataset.sample(frac=1).reset_index(drop=True)
         num_instances = len(dataset)
         self.num_train = num_instances * (1 - self.dev_ratio - self.test_ratio)
         self.num_dev = num_instances * self.dev_ratio
@@ -112,6 +113,7 @@ class SNLIDataset(DatasetExperiment):
         dataset = pd.read_csv('{}{}'.format(self.data_dir, 'train_snli.txt'),
                               delimiter='\t', header=None, names=columns, na_values='')
         dataset.dropna(inplace=True)
+        dataset = dataset.sample(frac=1).reset_index(drop=True)
         num_instances = len(dataset)
         self.num_train = num_instances * (1 - self.dev_ratio - self.test_ratio)
         self.num_dev = num_instances * self.dev_ratio

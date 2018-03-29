@@ -21,6 +21,9 @@ def train(main_config, model_config, model_name, dataset_name):
     model = MODELS[model_name]
     dataset = DATASETS[dataset_name]()
 
+    model_name = '{}_{}'.format(model_name,
+                                main_config['PARAMS']['embedding_size'])
+
     train_data = dataset.train_set_pairs()
     vectorizer = DatasetVectorizer(train_data, main_cfg.model_dir)
 
@@ -28,17 +31,13 @@ def train(main_config, model_config, model_name, dataset_name):
     max_sentence_len = vectorizer.max_sentence_len
     vocabulary_size = vectorizer.vocabulary_size
 
-    # print(snli_dataset)
-
-    test_sen1, test_sen2 = dataset_helper.test_instances()
+    test_sentence1, test_sentence2 = dataset_helper.test_instances()
     test_labels = dataset_helper.test_labels()
     test_labels = test_labels.reshape(-1, 1)
+
     num_batches = dataset_helper.num_batches
-
     model = model(max_sentence_len, vocabulary_size, main_config, model_config)
-
     model_saver = ModelSaver(main_cfg.model_dir, model_name, main_cfg.checkpoints_to_keep)
-
     config = tf.ConfigProto(allow_soft_placement=True, log_device_placement=main_cfg.log_device_placement)
 
     with tf.Session(config=config) as session:
@@ -47,49 +46,42 @@ def train(main_config, model_config, model_name, dataset_name):
         session.run(init)
         log_saver = LogSaver(main_cfg.logs_path, model_name, dataset_name, session.graph)
         metrics = {'acc': 0.0}
-        test_acc_per_epoch = []
+        dev_acc_per_epoch = []
         time_per_epoch = []
         for epoch in tqdm(range(main_cfg.num_epochs), desc='Epochs'):
             start_time = time.time()
 
-            train_sen1, train_sen2 = dataset_helper.train_instances(shuffle=True)
+            train_sentence1, train_sentence2 = dataset_helper.train_instances(shuffle=True)
             train_labels = dataset_helper.train_labels()
 
-            train_batch_helper = BatchHelper(train_sen1, train_sen2, train_labels, main_cfg.batch_size)
+            train_batch_helper = BatchHelper(train_sentence1, train_sentence2, train_labels, main_cfg.batch_size)
 
             # small eval set for measuring train accuracy
-            val_sen1, val_sen2, val_labels = dataset_helper.dev_instances()
-            val_labels = val_labels.reshape(-1, 1)
-            tqdm_iter = tqdm(range(num_batches), total=num_batches, desc="Batches", leave=False, postfix=metrics)
+            dev_sentence1, dev_sentence2, dev_labels = dataset_helper.dev_instances()
+            dev_labels = dev_labels.reshape(-1, 1)
 
+            tqdm_iter = tqdm(range(num_batches), total=num_batches, desc="Batches", leave=False, postfix=metrics)
             for batch in tqdm_iter:
                 global_step += 1
-                x1_batch, x2_batch, y_batch = train_batch_helper.next(batch)
-                feed_dict = {model.x1: x1_batch, model.x2: x2_batch, model.labels: y_batch}
-                loss, _ = session.run([model.loss, model.opt], feed_dict=feed_dict)
+                sentence1_batch, sentence2_batch, labels_batch = train_batch_helper.next(batch)
+                feed_dict_train = {model.x1: sentence1_batch, model.x2: sentence2_batch, model.labels: labels_batch}
+                loss, _ = session.run([model.loss, model.opt], feed_dict=feed_dict_train)
 
                 if batch % main_cfg.eval_every == 0:
-                    feed_dict = {model.x1: val_sen1, model.x2: val_sen2, model.labels: val_labels}
-                    train_accuracy, train_summary, loss = session.run([model.accuracy, model.summary_op, model.loss],
-                                                                      feed_dict=feed_dict)
-                    log_saver.log_train(train_summary, global_step)
-
-                    feed_dict = {model.x1: test_sen1,
-                                 model.x2: test_sen2,
-                                 model.labels: test_labels}
-                    test_accuracy, test_summary = session.run([model.accuracy, model.summary_op], feed_dict=feed_dict)
-                    log_saver.log_test(test_summary, global_step)
-
+                    feed_dict_dev = {model.x1: dev_sentence1, model.x2: dev_sentence2, model.labels: dev_labels}
+                    dev_accuracy, dev_summary = session.run([model.accuracy, model.summary_op],
+                                                            feed_dict=feed_dict_dev)
+                    log_saver.log_dev(dev_summary, global_step)
                     tqdm_iter.set_postfix(
-                        train_test_acc='{:.2f}|{:.2f}'.format(float(train_accuracy), float(test_accuracy)),
+                        dev_acc='{:.2f}'.format(float(dev_accuracy)),
                         loss='{:.2f}'.format(float(loss)),
                         epoch=epoch)
 
                 if global_step % main_cfg.save_every == 0:
                     model_saver.save(session, global_step=global_step)
 
-            test_accuracy = evaluate_model(model, session, test_sen1, test_sen2, test_labels)
-            test_acc_per_epoch.append(test_accuracy)
+            dev_accuracy = evaluate_model(model, session, dev_sentence1, dev_sentence2, dev_labels)
+            dev_acc_per_epoch.append(dev_accuracy)
 
             end_time = time.time()
             total_time = timer(start_time, end_time)
@@ -97,9 +89,14 @@ def train(main_config, model_config, model_name, dataset_name):
 
             model_saver.save(session, global_step=global_step)
 
-        save_model_eval('{}/{}'.format(main_cfg.model_dir, model_name), sum(test_acc_per_epoch)/len(test_acc_per_epoch),
-                        test_acc_per_epoch[-1],
-                        time_per_epoch[-1])
+        test_accuracy = evaluate_model(model, session, test_sentence1, test_sentence2, test_labels)
+
+        save_model_eval('{}/{}'.format(main_cfg.model_dir, model_name),
+                        sum(dev_acc_per_epoch)/len(dev_acc_per_epoch),
+                        dev_acc_per_epoch[-1],
+                        test_accuracy,
+                        time_per_epoch[-1],
+                        dataset)
 
 
 def predict(main_config, model_config, model):

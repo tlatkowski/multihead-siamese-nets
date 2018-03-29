@@ -21,12 +21,16 @@ def evaluate_model(model, session, x1, x2, labels, batch_size=100):
     return accuracy
 
 
-def save_model_eval(model_path, mean_test_acc, last_test_acc, epoch_time):
+def save_model_eval(model_path, mean_dev_acc, last_dev_acc, test_acc, epoch_time, dataset):
     config = configparser.ConfigParser()
     config.add_section('EVALUATION')
-    config.set('EVALUATION', 'MEAN_TEST_ACC', str(mean_test_acc))
-    config.set('EVALUATION', 'LAST_TEST_ACC', str(last_test_acc))
+    config.set('EVALUATION', 'MEAN_DEV_ACC', str(mean_dev_acc))
+    config.set('EVALUATION', 'LAST_DEV_ACC', str(last_dev_acc))
+    config.set('EVALUATION', 'TEST_ACC', str(test_acc))
     config.set('EVALUATION', 'EPOCH_TIME', str(epoch_time))
+    config.set('EVALUATION', 'NUM_TRAINS', str(len(dataset.train_labels())))
+    config.set('EVALUATION', 'NUM_DEVS', str(len(dataset.dev_labels())))
+    config.set('EVALUATION', 'NUM_TESTS', str(len(dataset.test_labels())))
 
     with open('{}/evaluation.ini'.format(model_path), 'w') as configfile:  # save
         config.write(configfile)
