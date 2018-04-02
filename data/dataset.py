@@ -22,7 +22,7 @@ columns = [ColumnType.sentence1.name,
 
 class DatasetExperiment:
 
-    def __init__(self, dev_ratio=0.01, test_ratio=0.01):
+    def __init__(self, dev_ratio=0.02, test_ratio=0.02):
         self.data_dir = self._data_path()
         self.dev_ratio = dev_ratio
         self.test_ratio = test_ratio
@@ -66,7 +66,7 @@ class QQPDataset(DatasetExperiment):
                               sep=',',
                               usecols=['question1', 'question2', 'is_duplicate'])
         dataset.dropna(inplace=True)
-        dataset = dataset.sample(frac=1).reset_index(drop=True)
+        dataset = dataset.sample(frac=1, random_state=1).reset_index(drop=True)
         num_instances = len(dataset)
         self.num_train = num_instances * (1 - self.dev_ratio - self.test_ratio)
         self.num_dev = num_instances * self.dev_ratio
@@ -113,7 +113,7 @@ class SNLIDataset(DatasetExperiment):
         dataset = pd.read_csv('{}{}'.format(self.data_dir, 'train_snli.txt'),
                               delimiter='\t', header=None, names=columns, na_values='')
         dataset.dropna(inplace=True)
-        dataset = dataset.sample(frac=1).reset_index(drop=True)
+        dataset = dataset.sample(frac=1, random_state=1).reset_index(drop=True)
         num_instances = len(dataset)
         self.num_train = num_instances * (1 - self.dev_ratio - self.test_ratio)
         self.num_dev = num_instances * self.dev_ratio

@@ -64,11 +64,17 @@ def train(main_config, model_config, model_name, dataset_name):
             for batch in tqdm_iter:
                 global_step += 1
                 sentence1_batch, sentence2_batch, labels_batch = train_batch_helper.next(batch)
-                feed_dict_train = {model.x1: sentence1_batch, model.x2: sentence2_batch, model.labels: labels_batch}
+                feed_dict_train = {model.x1: sentence1_batch,
+                                   model.x2: sentence2_batch,
+                                   model.is_training: True,
+                                   model.labels: labels_batch}
                 loss, _ = session.run([model.loss, model.opt], feed_dict=feed_dict_train)
 
                 if batch % main_cfg.eval_every == 0:
-                    feed_dict_dev = {model.x1: dev_sentence1, model.x2: dev_sentence2, model.labels: dev_labels}
+                    feed_dict_dev = {model.x1: dev_sentence1,
+                                     model.x2: dev_sentence2,
+                                     model.is_training: False,
+                                     model.labels: dev_labels}
                     dev_accuracy, dev_summary = session.run([model.accuracy, model.summary_op],
                                                             feed_dict=feed_dict_dev)
                     log_saver.log_dev(dev_summary, global_step)

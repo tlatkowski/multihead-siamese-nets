@@ -3,6 +3,7 @@ from layers.losses import mse
 from layers.similarity import manhattan_similarity
 from models.base_model import SiameseNet
 from utils.config_helpers import parse_list
+from layers.basics import dropout
 
 
 class CnnSiameseNet(SiameseNet):
@@ -24,5 +25,8 @@ class CnnSiameseNet(SiameseNet):
                           num_filters=num_filters,
                           filter_sizes=filter_sizes,
                           reuse=True)
+
+        out1 = dropout(out1, self.is_training)
+        out2 = dropout(out2, self.is_training)
 
         return manhattan_similarity(out1, out2)

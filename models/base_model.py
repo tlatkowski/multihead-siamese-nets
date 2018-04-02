@@ -10,6 +10,7 @@ class SiameseNet:
     def __init__(self, max_sequence_len, vocabulary_size, main_cfg, model_cfg, loss_function):
         self.x1 = tf.placeholder(dtype=tf.int32, shape=[None, max_sequence_len])
         self.x2 = tf.placeholder(dtype=tf.int32, shape=[None, max_sequence_len])
+        self.is_training = tf.placeholder(dtype=tf.bool)
         self.labels = tf.placeholder(dtype=tf.int32, shape=[None, 1])
         self.sentences_lengths = tf.placeholder(dtype=tf.int32, shape=[None])
 

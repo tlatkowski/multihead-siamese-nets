@@ -19,12 +19,14 @@ class MultiheadAttentionSiameseNet(SiameseNet):
         out1, self.debug = stacked_multihead_attention(self.embedded_x1,
                                                        num_blocks=num_blocks,
                                                        num_heads=num_heads,
-                                                       use_residual=use_residual)
+                                                       use_residual=use_residual,
+                                                       is_training=self.is_training)
 
         out2, _ = stacked_multihead_attention(self.embedded_x2,
                                               num_blocks=num_blocks,
                                               num_heads=num_heads,
                                               use_residual=use_residual,
+                                              is_training=self.is_training,
                                               reuse=True)
 
         out1 = tf.reduce_sum(out1, axis=1)

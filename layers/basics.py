@@ -15,8 +15,8 @@ def linear(x, num_hiddens=None, reuse=False):
     return linear_layer
 
 
-def dropout(x, rate=0.2):
-    return tf.layers.dropout(x, rate)
+def dropout(x, is_training, rate=0.2):
+    return tf.layers.dropout(x, rate, training=tf.convert_to_tensor(is_training))
 
 
 def residual(x_in, x_out, reuse=False):
