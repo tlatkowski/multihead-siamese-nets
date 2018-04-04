@@ -1,15 +1,15 @@
 from layers.convolution import cnn_layers
 from layers.losses import mse
 from layers.similarity import manhattan_similarity
-from models.base_model import SiameseNet
+from models.base_model import BaseSiameseNet
 from utils.config_helpers import parse_list
 from layers.basics import dropout
 
 
-class CnnSiameseNet(SiameseNet):
+class CnnSiameseNet(BaseSiameseNet):
 
     def __init__(self, max_sequence_len, vocabulary_size, main_cfg, model_cfg):
-        SiameseNet.__init__(self, max_sequence_len, vocabulary_size, main_cfg, model_cfg, mse)
+        BaseSiameseNet.__init__(self, max_sequence_len, vocabulary_size, main_cfg, model_cfg, mse)
 
     def siamese_layer(self, sequence_len, model_cfg):
         num_filters = parse_list(model_cfg['PARAMS']['num_filters'])

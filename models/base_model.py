@@ -1,11 +1,10 @@
-import abc
 
 import tensorflow as tf
+
 from layers.basics import optimize
 
 
-class SiameseNet:
-    __metaclass__ = abc.ABCMeta
+class BaseSiameseNet:
 
     def __init__(self, max_sequence_len, vocabulary_size, main_cfg, model_cfg, loss_function):
         self.x1 = tf.placeholder(dtype=tf.int32, shape=[None, max_sequence_len])
@@ -41,6 +40,6 @@ class SiameseNet:
             tf.summary.scalar("accuracy", self.accuracy)
             self.summary_op = tf.summary.merge_all()
 
-    @abc.abstractmethod
     def siamese_layer(self, sequence_len, model_cfg):
         """Implementation of specific siamese layer"""
+        raise NotImplementedError()

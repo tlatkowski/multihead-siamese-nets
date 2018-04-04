@@ -3,13 +3,13 @@ import tensorflow as tf
 from layers.attention import stacked_multihead_attention
 from layers.losses import mse
 from layers.similarity import manhattan_similarity
-from models.base_model import SiameseNet
+from models.base_model import BaseSiameseNet
 
 
-class MultiheadAttentionSiameseNet(SiameseNet):
+class MultiheadAttentionSiameseNet(BaseSiameseNet):
 
     def __init__(self, max_sequence_len, vocabulary_size, main_cfg, model_cfg):
-        SiameseNet.__init__(self, max_sequence_len, vocabulary_size, main_cfg, model_cfg, mse)
+        BaseSiameseNet.__init__(self, max_sequence_len, vocabulary_size, main_cfg, model_cfg, mse)
 
     def siamese_layer(self, sequence_len, model_cfg):
         num_blocks = model_cfg['PARAMS'].getint('num_blocks')

@@ -6,14 +6,15 @@ from argparse import ArgumentParser
 import tensorflow as tf
 from tqdm import tqdm
 
-from utils.data_utils import DatasetVectorizer
 from data.dataset import Dataset, DATASETS
 from models.model_type import MODELS
 from utils.batch_helper import BatchHelper
 from utils.config_helpers import MainConfig
+from utils.data_utils import DatasetVectorizer
 from utils.log_saver import LogSaver
+from utils.model_evaluator import ModelEvaluator
 from utils.model_saver import ModelSaver
-from utils.other_utils import timer, evaluate_model, save_model_eval
+from utils.other_utils import timer
 
 
 def train(main_config, model_config, model_name, dataset_name):
@@ -45,8 +46,9 @@ def train(main_config, model_config, model_name, dataset_name):
         init = tf.global_variables_initializer()
         session.run(init)
         log_saver = LogSaver(main_cfg.logs_path, model_name, dataset_name, session.graph)
+        model_evaluator = ModelEvaluator(model, session)
+
         metrics = {'acc': 0.0}
-        dev_acc_per_epoch = []
         time_per_epoch = []
         for epoch in tqdm(range(main_cfg.num_epochs), desc='Epochs'):
             start_time = time.time()
@@ -75,6 +77,7 @@ def train(main_config, model_config, model_name, dataset_name):
                                      model.x2: dev_sentence2,
                                      model.is_training: False,
                                      model.labels: dev_labels}
+
                     dev_accuracy, dev_summary = session.run([model.accuracy, model.summary_op],
                                                             feed_dict=feed_dict_dev)
                     log_saver.log_dev(dev_summary, global_step)
@@ -86,8 +89,7 @@ def train(main_config, model_config, model_name, dataset_name):
                 if global_step % main_cfg.save_every == 0:
                     model_saver.save(session, global_step=global_step)
 
-            dev_accuracy = evaluate_model(model, session, dev_sentence1, dev_sentence2, dev_labels)
-            dev_acc_per_epoch.append(dev_accuracy)
+            model_evaluator.evaluate_dev(dev_sentence1, dev_sentence2, dev_labels)
 
             end_time = time.time()
             total_time = timer(start_time, end_time)
@@ -95,14 +97,8 @@ def train(main_config, model_config, model_name, dataset_name):
 
             model_saver.save(session, global_step=global_step)
 
-        test_accuracy = evaluate_model(model, session, test_sentence1, test_sentence2, test_labels)
-
-        save_model_eval('{}/{}'.format(main_cfg.model_dir, model_name),
-                        sum(dev_acc_per_epoch)/len(dev_acc_per_epoch),
-                        dev_acc_per_epoch[-1],
-                        test_accuracy,
-                        time_per_epoch[-1],
-                        dataset)
+        model_evaluator.evaluate_test(test_sentence1, test_sentence2, test_labels)
+        model_evaluator.save_evaluation('{}/{}'.format(main_cfg.model_dir, model_name), time_per_epoch[-1], dataset)
 
 
 def predict(main_config, model_config, model):
