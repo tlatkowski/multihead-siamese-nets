@@ -1,5 +1,3 @@
-import configparser
-import os
 import time
 from argparse import ArgumentParser
 
@@ -14,7 +12,7 @@ from utils.data_utils import DatasetVectorizer
 from utils.log_saver import LogSaver
 from utils.model_evaluator import ModelEvaluator
 from utils.model_saver import ModelSaver
-from utils.other_utils import timer
+from utils.other_utils import timer, set_visible_gpu, init_config
 
 
 def train(main_config, model_config, model_name, dataset_name):
@@ -151,13 +149,10 @@ def main():
 
     args = parser.parse_args()
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
+    set_visible_gpu(args.gpu)
 
-    main_config = configparser.ConfigParser()
-    main_config.read('config/main.ini')
-
-    model_config = configparser.ConfigParser()
-    model_config.read('config/model/{}.ini'.format(args.model))
+    main_config = init_config()
+    model_config = init_config(args.model)
 
     mode = args.mode
 
