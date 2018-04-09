@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/tlatkowski/multihead-siamese-nets.svg?style=plastic?branch=master)](https://travis-ci.org/tlatkowski/multihead-siamese-nets) ![](https://img.shields.io/badge/Python-3.6-blue.svg) ![](https://img.shields.io/badge/TensorFlow-1.5.0-blue.svg) ![](https://img.shields.io/badge/License-MIT-blue.svg)
+![](https://img.shields.io/badge/Python-3.6-blue.svg) ![](https://img.shields.io/badge/TensorFlow-1.5.0-blue.svg) ![](https://img.shields.io/badge/License-MIT-blue.svg)
 
 # Siamese Deep Neural Networks for semantic similarity.
 This repository contains implementation of Siamese Neural Networks in Tensorflow built based on 3 different and major deep learning architectures:
