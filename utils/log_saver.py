@@ -5,7 +5,7 @@ import tensorflow as tf
 
 class LogSaver:
 
-    def __init__(self, logs_path, model_name, dateset_name, graph: tf.Graph, scan_train=False):
+    def __init__(self, logs_path, model_name, dateset_name, graph: tf.Graph, scan_train=True):
 
         if not os.path.isdir(logs_path):
             os.makedirs(logs_path)

@@ -67,19 +67,16 @@ python3 run.py train cnn SNLI
 This repository contains main configuration training file placed in **'config/main.ini'**.
 
 ```ini
-
 [TRAINING]
 num_epochs = 10
 batch_size = 512
 eval_every = 20
 learning_rate = 0.001
-checkpoints_to_keep = 10
+checkpoints_to_keep = 5
 save_every = 100
-eval_size = 5000
 log_device_placement = false
 
 [DATA]
-file_name = corpora/train_snli.txt
 num_tests = 50000
 logs_path = logs
 model_dir = model_dir

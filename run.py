@@ -30,6 +30,9 @@ def train(main_config, model_config, model_name, dataset_name):
     max_sentence_len = vectorizer.max_sentence_len
     vocabulary_size = vectorizer.vocabulary_size
 
+    train_mini_sen1, train_mini_sen2, train_mini_labels = dataset_helper.pick_train_mini_batch()
+    train_mini_labels = train_mini_labels.reshape(-1, 1)
+
     test_sentence1, test_sentence2 = dataset_helper.test_instances()
     test_labels = dataset_helper.test_labels()
     test_labels = test_labels.reshape(-1, 1)
@@ -56,7 +59,7 @@ def train(main_config, model_config, model_name, dataset_name):
 
             train_batch_helper = BatchHelper(train_sentence1, train_sentence2, train_labels, main_cfg.batch_size)
 
-            # small eval set for measuring train accuracy
+            # small eval set for measuring dev accuracy
             dev_sentence1, dev_sentence2, dev_labels = dataset_helper.dev_instances()
             dev_labels = dev_labels.reshape(-1, 1)
 
@@ -71,6 +74,15 @@ def train(main_config, model_config, model_name, dataset_name):
                 loss, _ = session.run([model.loss, model.opt], feed_dict=feed_dict_train)
 
                 if batch % main_cfg.eval_every == 0:
+                    feed_dict_train = {model.x1: train_mini_sen1,
+                                     model.x2: train_mini_sen2,
+                                     model.is_training: False,
+                                     model.labels: train_mini_labels}
+
+                    train_accuracy, train_summary = session.run([model.accuracy, model.summary_op],
+                                                                feed_dict=feed_dict_train)
+                    log_saver.log_train(train_summary, global_step)
+
                     feed_dict_dev = {model.x1: dev_sentence1,
                                      model.x2: dev_sentence2,
                                      model.is_training: False,
@@ -81,6 +93,7 @@ def train(main_config, model_config, model_name, dataset_name):
                     log_saver.log_dev(dev_summary, global_step)
                     tqdm_iter.set_postfix(
                         dev_acc='{:.2f}'.format(float(dev_accuracy)),
+                        train_acc='{:.2f}'.format(float(train_accuracy)),
                         loss='{:.2f}'.format(float(loss)),
                         epoch=epoch)
 

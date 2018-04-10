@@ -22,7 +22,7 @@ columns = [ColumnType.sentence1.name,
 
 class DatasetExperiment:
 
-    def __init__(self, dev_ratio=0.02, test_ratio=0.02):
+    def __init__(self, dev_ratio=0.01, test_ratio=0.1):
         self.data_dir = self._data_path()
         self.dev_ratio = dev_ratio
         self.test_ratio = test_ratio
@@ -192,6 +192,15 @@ class Dataset:
 
     def dev_instances(self):
         return self.dev_sen1, self.dev_sen2, self._dev_labels
+
+    def num_dev_instances(self):
+        return len(self._dev_labels)
+
+    def pick_train_mini_batch(self):
+        train_idxs = np.arange(len(self._train_labels))
+        np.random.shuffle(train_idxs)
+        train_idxs = train_idxs[:self.num_dev_instances()]
+        return self.train_sen1[train_idxs], self.train_sen2[train_idxs], self._train_labels[train_idxs]
 
     def __str__(self):
         return 'Dataset properties:\n ' \
