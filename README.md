@@ -14,7 +14,18 @@ Current version of pipeline supports working with 2 datasets:
 - [Quora Question Pairs](https://www.kaggle.com/c/quora-question-pairs)
 
 # Installation
-This project was developed in and has been tested on Python 3.6. The package requirements are stored in **requirements** folder.
+
+### Data preparation
+
+In order to download data, execute the following commands (this process can take a while depending on your network throughput):
+```
+cd bin
+./prepare_data.sh
+```
+As as result of executing above script, **corpora** directory will be created with **QQP** and **SNLI** data.
+
+### Dependency installation
+This project was developed in and has been tested on **Python 3.6**. The package requirements are stored in **requirements** folder.
 
 To install the requirements, execute the following command:
 
@@ -25,13 +36,6 @@ pip install -r requirements/requirements-gpu.txt
 and for **CPU** usage:
 ```
 pip install -r requirements/requirements-cpu.txt
-```
-
-Additionally, you need to have **git-lfs** installed to run model training on predefined corpora.
-
-After installing git lfs, execute the following command in order to pull datasets:
-```
-git lfs pull
 ```
 
 # Running models
@@ -109,7 +113,7 @@ hidden_size = 128
 cell_type = GRU
 bidirectional = True
 ```
-# Comparison of models
+# Comparison of models [TBD]
 Models are compared upon SNLI corpora.
 
 Experiment parameters:
