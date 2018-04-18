@@ -20,6 +20,7 @@ Current version of pipeline supports working with 2 datasets:
 In order to download data, execute the following commands (this process can take a while depending on your network throughput):
 ```
 cd bin
+chmod a+x prepare_data.sh
 ./prepare_data.sh
 ```
 As as result of executing above script, **corpora** directory will be created with **QQP** and **SNLI** data.
