@@ -82,7 +82,6 @@ save_every = 100
 log_device_placement = false
 
 [DATA]
-num_tests = 50000
 logs_path = logs
 model_dir = model_dir
 
@@ -114,8 +113,11 @@ hidden_size = 128
 cell_type = GRU
 bidirectional = True
 ```
-# Comparison of models [TBD]
-Models are compared upon SNLI corpora.
+# Comparison of models  [TBD]
+
+Experiments performed on GPU **Nvidia GeForce GTX 1080Ti**.
+
+## SNLI dataset.
 
 Experiment parameters:
 ```ini
@@ -123,10 +125,12 @@ Number of epochs : 10
 Batch size : 512
 Learning rate : 0.001
 
-Number of train instances : 367373
-Number of test instances : 50000
+Number of training instances : 326959
+Number of dev instances : 3674
+Number of test instances : 36736
+
 Embedding size : 64
-Loss function: mean squared error
+Loss function: mean squared error (MSE)
 ```
 
 Specific hyperparameters of models:
@@ -136,17 +140,22 @@ CNN | RNN | Multihead
 num_filters = 50,50,50 | hidden_size = 128 | num_blocks = 2
 filter_sizes = 2,3,4 | cell_type = GRU | num_heads = 8
 |  | bidirectional = True | use_residual = False
+|  |  | layers_normalization = False
 
 Evaluation results:
 
-Model | Test Accuracy | Train Accuracy | Epoch Time
------------- | ------------ | ------------- | -------------
-CNN |  |  |  
-RNN |  |  |  
-Multihead |  |  | 
+Model | Mean-Dev-Acc* | Last-Dev-Acc** | Test-Acc | Epoch Time
+------------ | ------------ | ------------- | ------------- | -------------
+CNN | 76.51 | 75.08 | 75.40 | 15.97s 
+RNN | 79.36 | 79.52 | 79.56 | 1 min 22.95s 
+Multihead | 78.52 | 79.61 | 78.29 | 1 min 00.24s  
 
-Training curve (Accuracy): 
+*Mean-Dev-Acc: the mean development set accuaracy over all epochs.
+
+**Last-Dev-Acc: the development set accuaracy for the last epoch.
+
+Training curves (Accuracy & Loss): 
 ![alt text][results]
 
-[results]: https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/results.png "Evaluation results"
+[results]: https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/snli_results.png "Evaluation results"
 
