@@ -113,11 +113,11 @@ hidden_size = 128
 cell_type = GRU
 bidirectional = True
 ```
-# Comparison of models  [TBD]
+# Comparison of models
 
 Experiments performed on GPU **Nvidia GeForce GTX 1080Ti**.
 
-## SNLI dataset.
+## > SNLI dataset.
 
 Experiment parameters:
 ```ini
@@ -147,7 +147,7 @@ Evaluation results:
 Model | Mean-Dev-Acc* | Last-Dev-Acc** | Test-Acc | Epoch Time
 ------------ | ------------ | ------------- | ------------- | -------------
 CNN | 76.51 | 75.08 | 75.40 | 15.97s 
-RNN | 79.36 | 79.52 | 79.56 | 1 min 22.95s 
+bi-RNN | 79.36 | 79.52 | 79.56 | 1 min 22.95s 
 Multihead | 78.52 | 79.61 | 78.29 | 1 min 00.24s  
 
 *Mean-Dev-Acc: the mean development set accuaracy over all epochs.
@@ -155,7 +155,48 @@ Multihead | 78.52 | 79.61 | 78.29 | 1 min 00.24s
 **Last-Dev-Acc: the development set accuaracy for the last epoch.
 
 Training curves (Accuracy & Loss): 
-![alt text][results]
+![SNLI][results_snli]
 
-[results]: https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/snli_results.png "Evaluation results"
+[results_snli]: https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/snli_train_curves.png "Evaluation results"
 
+## > QQP dataset.
+
+Experiment parameters:
+```ini
+Number of epochs : 10
+Batch size : 512
+Learning rate : 0.001
+
+Number of training instances : 362646
+Number of dev instances : 1213
+Number of test instances : 40428
+
+Embedding size : 64
+Loss function: mean squared error (MSE)
+```
+
+Specific hyperparameters of models:
+
+CNN | RNN | Multihead
+------------ | ------------- | -------------
+num_filters = 50,50,50 | hidden_size = 128 | num_blocks = 2
+filter_sizes = 2,3,4 | cell_type = GRU | num_heads = 8
+|  | bidirectional = True | use_residual = False
+|  |  | layers_normalization = False
+
+Evaluation results:
+
+Model | Mean-Dev-Acc* | Last-Dev-Acc** | Test-Acc | Epoch Time
+------------ | ------------ | ------------- | ------------- | -------------
+CNN | 79.74 | 80.83 | 80.90 | 49.84s 
+bi-RNN | 82.68 | 83.66 | 83.30 | 4 min 26.91s 
+Multihead | 80.75 | 81.74 | 80.99 | 4 min 58.58s  
+
+*Mean-Dev-Acc: the mean development set accuaracy over all epochs.
+
+**Last-Dev-Acc: the development set accuaracy for the last epoch.
+
+Training curves (Accuracy & Loss): 
+![QQP][qqp_results]
+
+[qqp_results]: https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/qqp_train_curves.png "Evaluation results"
