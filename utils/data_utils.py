@@ -10,16 +10,20 @@ logger.setLevel(logging.INFO)
 
 class DatasetVectorizer:
 
-    def __init__(self, raw_sentence_pairs, model_dir, save_vocab=True):
-        os.makedirs(model_dir, exist_ok=True)
-        raw_sentence_pairs = raw_sentence_pairs.ravel()
-        raw_sentence_pairs = [str(x) for x in list(raw_sentence_pairs)]
-        self.sentences_lengths = [len(str(x).split(' ')) for x in list(raw_sentence_pairs)]
-        max_sentence_length = max(self.sentences_lengths)
-        self.vocabulary = VocabularyProcessor(max_sentence_length)
-
-        if save_vocab:
-            self.vocabulary.save('{}/vocab'.format(model_dir))
+    def __init__(self, model_dir, raw_sentence_pairs=None, save_vocab=True):
+        self.model_dir = model_dir
+        os.makedirs(self.model_dir, exist_ok=True)
+        if raw_sentence_pairs is None:
+            self.restore()
+        else:
+            raw_sentence_pairs = raw_sentence_pairs.ravel()
+            raw_sentence_pairs = [str(x) for x in list(raw_sentence_pairs)]
+            self.sentences_lengths = [len(str(x).split(' ')) for x in list(raw_sentence_pairs)]
+            max_sentence_length = max(self.sentences_lengths)
+            self.vocabulary = VocabularyProcessor(max_sentence_length)
+            self.vocabulary.fit(raw_sentence_pairs)
+            if save_vocab:
+                self.vocabulary.save('{}/vocab'.format(self.model_dir))
 
     @property
     def max_sentence_len(self):

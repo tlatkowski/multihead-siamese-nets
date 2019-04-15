@@ -24,7 +24,7 @@ def train(main_config, model_config, model_name, dataset_name):
                                 main_config['PARAMS']['embedding_size'])
 
     train_data = dataset.train_set_pairs()
-    vectorizer = DatasetVectorizer(train_data, main_cfg.model_dir)
+    vectorizer = DatasetVectorizer(main_cfg.model_dir, raw_sentence_pairs=train_data)
 
     dataset_helper = Dataset(vectorizer, dataset, main_cfg.batch_size)
     max_sentence_len = vectorizer.max_sentence_len
@@ -116,7 +116,7 @@ def predict(main_config, model_config, model):
 
     model_name = '{}_{}'.format(model,
                                 main_config['PARAMS']['embedding_size'])
-    model = MODELS[model_name]
+    model = MODELS[model]
     model_dir = str(main_config['DATA']['model_dir'])
 
     vectorizer = DatasetVectorizer(model_dir)
@@ -128,7 +128,7 @@ def predict(main_config, model_config, model):
 
     with tf.Session() as session:
         saver = tf.train.Saver()
-        last_checkpoint = tf.train.latest_checkpoint('{}/{}/model'.format(model_dir, model_name))
+        last_checkpoint = tf.train.latest_checkpoint('{}/{}'.format(model_dir, model_name))
         saver.restore(session, last_checkpoint)
         while True:
             x1 = input('First sentence:')
@@ -136,7 +136,7 @@ def predict(main_config, model_config, model):
             x1_sen = vectorizer.vectorize(x1)
             x2_sen = vectorizer.vectorize(x2)
 
-            feed_dict = {model.x1: x1_sen, model.x2: x2_sen}
+            feed_dict = {model.x1: x1_sen, model.x2: x2_sen, model.is_training: False}
             prediction = session.run([model.temp_sim], feed_dict=feed_dict)
             print(prediction)
 

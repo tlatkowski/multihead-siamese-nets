@@ -18,7 +18,7 @@ class MultiheadSiameseNetGuiDemo:
     
     
   def predict(self):
-    print('prediction')
+    raise NotImplementedError
   
   
 root = Tk()
