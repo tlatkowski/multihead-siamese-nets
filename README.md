@@ -192,9 +192,9 @@ CNN | 79.74 | 80.83 | 80.90 | 49.84s
 bi-RNN | 82.68 | 83.66 | 83.30 | 4 min 26.91s 
 Multihead | 80.75 | 81.74 | 80.99 | 4 min 58.58s  
 
-*Mean-Dev-Acc: the mean development set accuaracy over all epochs.
+*Mean-Dev-Acc: the mean development set accuracy over all epochs.
 
-**Last-Dev-Acc: the development set accuaracy for the last epoch.
+**Last-Dev-Acc: the development set accuracy for the last epoch.
 
 Training curves (Accuracy & Loss): 
 ![QQP][qqp_results]
