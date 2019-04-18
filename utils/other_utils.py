@@ -3,9 +3,11 @@ import os
 
 import tensorflow as tf
 
+from utils import constants
 from utils.batch_helper import BatchHelper
 
 logger = tf.logging
+tf.logging.set_verbosity(tf.logging.INFO)
 
 
 def timer(start, end):
@@ -38,7 +40,7 @@ def init_config(specific=None):
     config = configparser.ConfigParser()
     if specific is None:  # return main config
         logger.info('Reading main configuration.')
-        config.read('config/main.ini')
+        config.read(constants.MAIN_CONFIG_PATH)
     else:
         config.read('config/model/{}.ini'.format(specific))
         logger.info('Reading configuration for {} model.'.format(specific))

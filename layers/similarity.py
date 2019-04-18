@@ -32,11 +32,11 @@ def manhattan_distance(x1, x2):
     Returns: Manhattan distance between x1 and x2. Value grater than or equal to 0.
 
     """
-    return tf.reduce_sum(tf.abs(x1 - x2), axis=1, keep_dims=True)
+    return tf.reduce_sum(tf.abs(x1 - x2), axis=1, keepdims=True)
 
 
 def euclidean_distance(x1, x2):
-    return tf.sqrt(tf.reduce_sum(tf.square(x1 - x2), axis=1, keep_dims=True))
+    return tf.sqrt(tf.reduce_sum(tf.square(x1 - x2), axis=1, keepdims=True))
 
 
 def cosine_distance(x1, x2):
