@@ -39,7 +39,7 @@ and for **CPU** usage:
 pip install -r requirements/requirements-cpu.txt
 ```
 
-# Running models
+# Training models
 To train model run the following command:
 
 ```
@@ -68,7 +68,7 @@ Run the following command to train Siamese Neural Network based on CNN:
 ```
 python3 run.py train cnn SNLI
 ```
-# Training configuration
+## Training configuration
 This repository contains main configuration training file placed in **'config/main.ini'**.
 
 ```ini
@@ -90,29 +90,39 @@ embedding_size = 64
 loss_function = mse
 ```
 
-# Model configuration
+## Model configuration
 Additionally each model contains its own specific configuration file in which changing hyperparameters is possible.
 
-## Multihead Attention Network configuration file
+### Multihead Attention Network configuration file
 ```ini
 [PARAMS]
 num_blocks = 2
 num_heads = 8
 use_residual = False
 ```
-## Convolutional Neural Network configuration file
+### Convolutional Neural Network configuration file
 ```ini
 [PARAMS]
 num_filters = 50,50,50
 filter_sizes = 2,3,4
 ```
-## Recurrent Neural Network configuration file
+### Recurrent Neural Network configuration file
 ```ini
 [PARAMS]
 hidden_size = 128
 cell_type = GRU
 bidirectional = True
 ```
+
+## Training models with GPU support on Google Colaboratory
+
+If you don't have an access to workstation with GPU, you can use the below exemplary Google Colaboratory
+notebook for training your models (CNN, RNN or Multihead) on SNLI or QQP datasets with usage of K80 GPU 
+available within Google Colaboratory backend: [Multihead Siamese Nets in Google Colab](https://colab.research.google.com/drive/1FUEBV1JkQpF2iwFSDW338nAUhzPVZWAa)
+
+# Testing models
+You can download pretrained models from: [pretrained_models]()
+
 # Comparison of models
 
 Experiments performed on GPU **Nvidia GeForce GTX 1080Ti**.
