@@ -121,7 +121,15 @@ notebook for training your models (CNN, RNN or Multihead) on SNLI or QQP dataset
 available within Google Colaboratory backend: [Multihead Siamese Nets in Google Colab](https://colab.research.google.com/drive/1FUEBV1JkQpF2iwFSDW338nAUhzPVZWAa)
 
 # Testing models
-You can download pretrained models from: [pretrained_models]()
+Download pretrained models from the following link: [pretrained Siamese Nets models](https://drive.google.com/file/d/1STgv1hIxdVpKLQ6-EZK7J3C4ZtfZgbkS/view?usp=sharing), unzip and put them 
+into **./model_dir** directory. After that, you can test models either using predict mode of pipeline: 
+```bash
+python3 run.py predict CNN 
+```
+or using GUI demo:
+```bash
+python3 gui_demo.py
+```
 
 # Comparison of models
 
