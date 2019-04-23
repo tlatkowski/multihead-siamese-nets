@@ -2,22 +2,25 @@ import os
 from tkinter import *
 from tkinter import messagebox
 
+import numpy as np
 import tensorflow as tf
 
 from models.model_type import MODELS
 from utils.data_utils import DatasetVectorizer
 from utils.other_utils import init_config
 from utils.other_utils import logger
-import numpy as np
+
 
 class MultiheadSiameseNetGuiDemo:
   
   def __init__(self, master):
     frame = master
-    # frame.pack()
+    frame.title('Multihead Siamese Nets')
     
-    self.first_sentence_entry = Entry(frame, width=50, font="Helvetica 20")
-    self.second_sentence_entry = Entry(frame, width=50, font="Helvetica 20")
+    sample1 = StringVar(master, value='People waiting to get on a train or just getting off')
+    sample2 = StringVar(master, value='There are people just getting on a train')
+    self.first_sentence_entry = Entry(frame, width=50, font="Helvetica 20", textvariable=sample1)
+    self.second_sentence_entry = Entry(frame, width=50, font="Helvetica 20", textvariable=sample2)
     self.predictButton = Button(frame, text='Predict', font="Helvetica 20", command=self.predict)
     self.clearButton = Button(frame, text='Clear', command=self.clear, font="Helvetica 20")
     self.resultLabel = Label(frame, text='Result', font="Helvetica 20")
@@ -38,10 +41,10 @@ class MultiheadSiameseNetGuiDemo:
     self.first_sentence_label.grid(row=0, column=0, sticky=E)
     self.second_sentence_entry.grid(row=1, column=1, columnspan=4)
     self.second_sentence_label.grid(row=1, column=0, sticky=E)
-    self.model_type.grid(row=2, column=1, sticky=W+E, ipady=1)
-    self.predictButton.grid(row=2, column=2, sticky=W+E, ipady=1)
-    self.clearButton.grid(row=2, column=3, sticky=W+E, ipady=1)
-    self.resultLabel.grid(row=2, column=4, sticky=W+E, ipady=1)
+    self.model_type.grid(row=2, column=1, sticky=W + E, ipady=1)
+    self.predictButton.grid(row=2, column=2, sticky=W + E, ipady=1)
+    self.clearButton.grid(row=2, column=3, sticky=W + E, ipady=1)
+    self.resultLabel.grid(row=2, column=4, sticky=W + E, ipady=1)
     
     self.vectorizer = DatasetVectorizer(self.model_dir)
     
@@ -59,6 +62,7 @@ class MultiheadSiameseNetGuiDemo:
       x2_sen = self.vectorizer.vectorize(sentence2)
       feed_dict = {self.model.x1: x1_sen, self.model.x2: x2_sen, self.model.is_training: False}
       prediction = np.squeeze(self.session.run([self.model.predictions], feed_dict=feed_dict))
+      prediction = np.round(prediction, 2)
       self.resultLabel['text'] = prediction
       if prediction < 0.5:
         self.resultLabel.configure(foreground="red")

@@ -130,7 +130,8 @@ or using GUI demo:
 ```bash
 python3 gui_demo.py
 ```
-
+[](https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/negative_sample.png)
+[](https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/positive_sample.png)
 # Comparison of models
 
 Experiments performed on GPU **Nvidia GeForce GTX 1080Ti**.
