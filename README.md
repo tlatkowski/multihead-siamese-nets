@@ -131,9 +131,11 @@ or using GUI demo:
 python3 gui_demo.py
 ```
 
-The below pictures presents Multihead Siamese Nets GUI for positive and negative examples:
+The below pictures presents Multihead Siamese Nets GUI for:
+1. Positive example:
 [](https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/negative_sample.png)
 
+2. Negative example:
 [](https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/positive_sample.png)
 # Comparison of models
 
