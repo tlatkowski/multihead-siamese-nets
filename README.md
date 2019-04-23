@@ -133,10 +133,10 @@ python3 gui_demo.py
 
 The below pictures presents Multihead Siamese Nets GUI for:
 1. Positive example:
-[](https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/negative_sample.png)
+![](https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/positive_sample.png)
 
 2. Negative example:
-[](https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/positive_sample.png)
+![](https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/negative_sample.png)
 # Comparison of models
 
 Experiments performed on GPU **Nvidia GeForce GTX 1080Ti**.
