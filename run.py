@@ -154,6 +154,7 @@ def main():
 
     parser.add_argument('dataset',
                         choices=['QQP', 'SNLI'],
+                        nargs='?',
                         help='dataset to be used')
 
     parser.add_argument('--gpu',
@@ -161,7 +162,9 @@ def main():
                         help='index of GPU to be used (default: %(default))')
 
     args = parser.parse_args()
-
+    if 'train' in args.mode:
+        if args.dataset is None:
+            parser.error('Positional argument [dataset] is mandatory')
     set_visible_gpu(args.gpu)
 
     main_config = init_config()

@@ -124,13 +124,16 @@ available within Google Colaboratory backend: [Multihead Siamese Nets in Google 
 Download pretrained models from the following link: [pretrained Siamese Nets models](https://drive.google.com/file/d/1STgv1hIxdVpKLQ6-EZK7J3C4ZtfZgbkS/view?usp=sharing), unzip and put them 
 into **./model_dir** directory. After that, you can test models either using predict mode of pipeline: 
 ```bash
-python3 run.py predict CNN 
+python3 run.py predict cnn
 ```
 or using GUI demo:
 ```bash
 python3 gui_demo.py
 ```
+
+The below pictures presents Multihead Siamese Nets GUI for positive and negative examples:
 [](https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/negative_sample.png)
+
 [](https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/positive_sample.png)
 # Comparison of models
 
