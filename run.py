@@ -15,13 +15,10 @@ from utils.model_saver import ModelSaver
 from utils.other_utils import timer, set_visible_gpu, init_config
 
 
-def train(main_config, model_config, model_name, dataset_name):
+def train(main_config, model_config, model_name, experiment_name, dataset_name):
     main_cfg = MainConfig(main_config)
     model = MODELS[model_name]
     dataset = DATASETS[dataset_name]()
-
-    model_name = '{}_{}'.format(model_name,
-                                main_config['PARAMS']['embedding_size'])
 
     train_data = dataset.train_set_pairs()
     vectorizer = DatasetVectorizer(main_cfg.model_dir, raw_sentence_pairs=train_data)
@@ -39,14 +36,14 @@ def train(main_config, model_config, model_name, dataset_name):
 
     num_batches = dataset_helper.num_batches
     model = model(max_sentence_len, vocabulary_size, main_config, model_config)
-    model_saver = ModelSaver(main_cfg.model_dir, model_name, main_cfg.checkpoints_to_keep)
+    model_saver = ModelSaver(main_cfg.model_dir, experiment_name, main_cfg.checkpoints_to_keep)
     config = tf.ConfigProto(allow_soft_placement=True, log_device_placement=main_cfg.log_device_placement)
 
     with tf.Session(config=config) as session:
         global_step = 0
         init = tf.global_variables_initializer()
         session.run(init)
-        log_saver = LogSaver(main_cfg.logs_path, model_name, dataset_name, session.graph)
+        log_saver = LogSaver(main_cfg.logs_path, experiment_name, dataset_name, session.graph)
         model_evaluator = ModelEvaluator(model, session)
 
         metrics = {'acc': 0.0}
@@ -109,13 +106,11 @@ def train(main_config, model_config, model_name, dataset_name):
             model_saver.save(session, global_step=global_step)
 
         model_evaluator.evaluate_test(test_sentence1, test_sentence2, test_labels)
-        model_evaluator.save_evaluation('{}/{}'.format(main_cfg.model_dir, model_name), time_per_epoch[-1], dataset)
+        model_evaluator.save_evaluation('{}/{}'.format(main_cfg.model_dir, experiment_name), time_per_epoch[-1], dataset)
 
 
-def predict(main_config, model_config, model):
+def predict(main_config, model_config, model, experiment_name):
 
-    model_name = '{}_{}'.format(model,
-                                main_config['PARAMS']['embedding_size'])
     model = MODELS[model]
     model_dir = str(main_config['DATA']['model_dir'])
 
@@ -128,7 +123,7 @@ def predict(main_config, model_config, model):
 
     with tf.Session() as session:
         saver = tf.train.Saver()
-        last_checkpoint = tf.train.latest_checkpoint('{}/{}'.format(model_dir, model_name))
+        last_checkpoint = tf.train.latest_checkpoint('{}/{}'.format(model_dir, experiment_name))
         saver.restore(session, last_checkpoint)
         while True:
             x1 = input('First sentence:')
@@ -143,39 +138,47 @@ def predict(main_config, model_config, model):
 
 def main():
     parser = ArgumentParser()
-
+    
     parser.add_argument('mode',
                         choices=['train', 'predict'],
                         help='pipeline mode')
-
+    
     parser.add_argument('model',
                         choices=['rnn', 'cnn', 'multihead'],
                         help='model to be used')
-
+    
     parser.add_argument('dataset',
                         choices=['QQP', 'SNLI'],
                         nargs='?',
                         help='dataset to be used')
-
+    
+    parser.add_argument('--experiment_name',
+                        required=False,
+                        help='the name of run experiment')
+    
     parser.add_argument('--gpu',
                         default='0',
                         help='index of GPU to be used (default: %(default))')
-
+    
     args = parser.parse_args()
     if 'train' in args.mode:
         if args.dataset is None:
             parser.error('Positional argument [dataset] is mandatory')
     set_visible_gpu(args.gpu)
-
+    
     main_config = init_config()
     model_config = init_config(args.model)
-
+    
     mode = args.mode
-
+    
+    experiment_name = args.experiment_name
+    if experiment_name is None:
+        experiment_name = '{}_{}'.format(args.model, main_config['PARAMS']['embedding_size'])
+    
     if 'train' in mode:
-        train(main_config, model_config, args.model, args.dataset)
+        train(main_config, model_config, args.model, experiment_name, args.dataset)
     else:
-        predict(main_config, model_config, args.model)
+        predict(main_config, model_config, args.model, experiment_name)
 
 
 if __name__ == '__main__':
