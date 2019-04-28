@@ -43,7 +43,7 @@ pip install -r requirements/requirements-cpu.txt
 To train model run the following command:
 
 ```
-python3 run.py train SELECTED_MODEL SELECTED_DATASET --gpu GPU_NUMBER
+python3 run.py train SELECTED_MODEL SELECTED_DATASET --experiment_name NAME --gpu GPU_NUMBER
 ```
 
 where **SELECTED_MODEL** represents one of the selected model among:
@@ -54,6 +54,8 @@ where **SELECTED_MODEL** represents one of the selected model among:
 and **SELECTED_DATASET** is represented by:
 - SNLI
 - QQP
+
+**--experiment_name** is an optional argument used for indicating experiment name. Default value **{SELECTED_MODEL}_{EMBEDDING_SIZE}**. 
 
 **--gpu** is an optional argument, use it in order to indicate specific GPU on your machine (the default value is '0').
 
@@ -99,12 +101,14 @@ Additionally each model contains its own specific configuration file in which ch
 num_blocks = 2
 num_heads = 8
 use_residual = False
+dropout_rate = 0.0
 ```
 ### Convolutional Neural Network configuration file
 ```ini
 [PARAMS]
 num_filters = 50,50,50
 filter_sizes = 2,3,4
+dropout_rate = 0.0
 ```
 ### Recurrent Neural Network configuration file
 ```ini
@@ -117,7 +121,7 @@ bidirectional = True
 ## Training models with GPU support on Google Colaboratory
 
 If you don't have an access to workstation with GPU, you can use the below exemplary Google Colaboratory
-notebook for training your models (CNN, RNN or Multihead) on SNLI or QQP datasets with usage of K80 GPU 
+notebook for training your models (CNN, RNN or Multihead) on SNLI or QQP datasets with usage of **NVIDIA Tesla T4 16GB GPU** 
 available within Google Colaboratory backend: [Multihead Siamese Nets in Google Colab](https://colab.research.google.com/drive/1FUEBV1JkQpF2iwFSDW338nAUhzPVZWAa)
 
 # Testing models
