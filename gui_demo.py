@@ -11,6 +11,9 @@ from utils.other_utils import init_config
 from utils.other_utils import logger
 
 GUI_FONT_SIZE = 14
+SAMPLE_SENTENCE1 = 'Wet brown dog swims towards camera.'
+SAMPLE_SENTENCE2 = 'A dog is in the water.'
+
 
 class MultiheadSiameseNetGuiDemo:
     
@@ -18,18 +21,24 @@ class MultiheadSiameseNetGuiDemo:
         frame = master
         frame.title('Multihead Siamese Nets')
         
-        sample1 = StringVar(master, value='People waiting to get on a train or just getting off')
-        sample2 = StringVar(master, value='There are people just getting on a train')
-        self.first_sentence_entry = Entry(frame, width=50, font="Helvetica {}".format(GUI_FONT_SIZE),
+        sample1 = StringVar(master, value=SAMPLE_SENTENCE1)
+        sample2 = StringVar(master, value=SAMPLE_SENTENCE2)
+        self.first_sentence_entry = Entry(frame, width=50,
+                                          font="Helvetica {}".format(GUI_FONT_SIZE),
                                           textvariable=sample1)
-        self.second_sentence_entry = Entry(frame, width=50, font="Helvetica {}".format(GUI_FONT_SIZE),
+        self.second_sentence_entry = Entry(frame, width=50,
+                                           font="Helvetica {}".format(GUI_FONT_SIZE),
                                            textvariable=sample2)
-        self.predictButton = Button(frame, text='Predict', font="Helvetica {}".format(GUI_FONT_SIZE),
+        self.predictButton = Button(frame, text='Predict',
+                                    font="Helvetica {}".format(GUI_FONT_SIZE),
                                     command=self.predict)
-        self.clearButton = Button(frame, text='Clear', command=self.clear, font="Helvetica {}".format(GUI_FONT_SIZE))
+        self.clearButton = Button(frame, text='Clear', command=self.clear,
+                                  font="Helvetica {}".format(GUI_FONT_SIZE))
         self.resultLabel = Label(frame, text='Result', font="Helvetica {}".format(GUI_FONT_SIZE))
-        self.first_sentence_label = Label(frame, text='Sentence 1', font="Helvetica {}".format(GUI_FONT_SIZE))
-        self.second_sentence_label = Label(frame, text='Sentence 2', font="Helvetica {}".format(GUI_FONT_SIZE))
+        self.first_sentence_label = Label(frame, text='Sentence 1',
+                                          font="Helvetica {}".format(GUI_FONT_SIZE))
+        self.second_sentence_label = Label(frame, text='Sentence 2',
+                                           font="Helvetica {}".format(GUI_FONT_SIZE))
         
         self.main_config = init_config()
         self.model_dir = str(self.main_config['DATA']['model_dir'])
