@@ -14,6 +14,7 @@ class BaseSiameseNet:
         self.sentences_lengths = tf.placeholder(dtype=tf.int32, shape=[None])
 
         self.debug = None
+        self.debug_vars = dict()
 
         self.embedding_size = main_cfg['PARAMS'].getint('embedding_size')
         self.learning_rate = main_cfg['TRAINING'].getfloat('learning_rate')
