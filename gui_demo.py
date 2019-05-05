@@ -3,10 +3,10 @@ from tkinter import *
 from tkinter import messagebox
 
 import numpy as np
-import seaborn as sns
 import tensorflow as tf
-import matplotlib.pyplot as plt
+
 from models.model_type import MODELS
+from utils import visualization
 from utils.data_utils import DatasetVectorizer
 from utils.other_utils import init_config
 from utils.other_utils import logger
@@ -78,49 +78,10 @@ class MultiheadSiameseNetGuiDemo:
                          self.model.is_training: False}
             prediction, at1, at2 = np.squeeze(
                 self.session.run([self.model.predictions, self.model.debug_vars['attentions_x1'],
-                                 self.model.debug_vars['attentions_x2']], feed_dict=feed_dict))
-            xticklabels = sentence1.split(' ')
-            yticklabels = xticklabels
-            at11 = at1[0, :len(xticklabels), :len(xticklabels)]
-            at12 = at1[1, :len(xticklabels), :len(xticklabels)]
-            at13 = at1[2, :len(xticklabels), :len(xticklabels)]
-            at14 = at1[3, :len(xticklabels), :len(xticklabels)]
-            at15 = at1[4, :len(xticklabels), :len(xticklabels)]
-            at16 = at1[5, :len(xticklabels), :len(xticklabels)]
-            at17 = at1[6, :len(xticklabels), :len(xticklabels)]
-            at18 = at1[7, :len(xticklabels), :len(xticklabels)]
+                                  self.model.debug_vars['attentions_x2']], feed_dict=feed_dict))
             
-            # plt.figure(0)
-            f, axes = plt.subplots(4, 2)
-            sns.heatmap(at11, linewidths=.5, xticklabels=xticklabels,
-                        yticklabels=yticklabels, cmap='gist_gray', cbar=False, ax=axes[0, 0])
-            sns.heatmap(at12, linewidths=.5, xticklabels=xticklabels,
-                        # yticklabels=yticklabels, cmap='coolwarm', cbar=False, ax=axes[0, 1])
-                        yticklabels=yticklabels, cmap='gist_gray', cbar=False, ax=axes[0, 1])
-            sns.heatmap(at13, linewidths=.5, xticklabels=xticklabels,
-                        yticklabels=yticklabels, cmap='gist_gray', cbar=False, ax=axes[1, 0])
-            sns.heatmap(at14, linewidths=.5, xticklabels=xticklabels,
-                        yticklabels=yticklabels, cmap='gist_gray', cbar=False, ax=axes[1, 1])
-            sns.heatmap(at15, linewidths=.5, xticklabels=xticklabels,
-                        yticklabels=yticklabels, cmap='Greys', cbar=False, ax=axes[2, 0])
-            sns.heatmap(at16, linewidths=.5, xticklabels=xticklabels,
-                        yticklabels=yticklabels, cmap='Greys', cbar=False, ax=axes[2, 1])
-            sns.heatmap(at17, linewidths=.5, xticklabels=xticklabels,
-                        yticklabels=yticklabels, cmap='Greys', cbar=False, ax=axes[3, 0])
-            sns.heatmap(at18, linewidths=.5, xticklabels=xticklabels,
-                        yticklabels=yticklabels, cmap='Greys', cbar=False, ax=axes[3, 1])
-            plt.show()
-            # sns.heatmap(at1[0], linewidths=.1)
-            xticklabels = sentence2.split(' ')
-            yticklabels = xticklabels
-            at1 = at2[0, :len(xticklabels), :len(xticklabels)]
-            plt.figure(1)
-
-            sns.heatmap(at1, linewidths=.5, xticklabels=xticklabels,
-                        yticklabels=yticklabels)
-            plt.show()
-
-            # sns.heatmap(at2, linewidths=.1)
+            visualization.visualize_attention_weights(at1, sentence1)
+            visualization.visualize_attention_weights(at2, sentence2)
             
             prediction = np.round(prediction, 2)
             self.resultLabel['text'] = prediction
