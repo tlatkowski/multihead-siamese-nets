@@ -7,7 +7,8 @@ from matplotlib import interactive
 def visualize_attention_weights(attention_weights, sentence: str,
                                 cmap='coolwarm'):  # cmap='gist_gray'
     interactive(True)
-    num_heads = np.shape(attention_weights)[0]
+    # num_heads = np.shape(attention_weights)[0]
+    num_heads = 4
     xticklabels = sentence.split(' ')
     yticklabels = xticklabels
     
