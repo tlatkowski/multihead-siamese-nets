@@ -6,6 +6,7 @@ import numpy as np
 import tensorflow as tf
 
 from models.model_type import MODELS
+from utils import visualization
 from utils.data_utils import DatasetVectorizer
 from utils.other_utils import init_config
 from utils.other_utils import logger
@@ -18,32 +19,40 @@ SAMPLE_SENTENCE2 = 'A dog is in the water.'
 class MultiheadSiameseNetGuiDemo:
     
     def __init__(self, master):
-        frame = master
-        frame.title('Multihead Siamese Nets')
+        self.frame = master
+        self.frame.title('Multihead Siamese Nets')
         
         sample1 = StringVar(master, value=SAMPLE_SENTENCE1)
         sample2 = StringVar(master, value=SAMPLE_SENTENCE2)
-        self.first_sentence_entry = Entry(frame, width=50,
+        self.first_sentence_entry = Entry(self.frame, width=50,
                                           font="Helvetica {}".format(GUI_FONT_SIZE),
                                           textvariable=sample1)
-        self.second_sentence_entry = Entry(frame, width=50,
+        self.second_sentence_entry = Entry(self.frame, width=50,
                                            font="Helvetica {}".format(GUI_FONT_SIZE),
                                            textvariable=sample2)
-        self.predictButton = Button(frame, text='Predict',
+        self.predictButton = Button(self.frame, text='Predict',
                                     font="Helvetica {}".format(GUI_FONT_SIZE),
                                     command=self.predict)
-        self.clearButton = Button(frame, text='Clear', command=self.clear,
+        self.clearButton = Button(self.frame, text='Clear', command=self.clear,
                                   font="Helvetica {}".format(GUI_FONT_SIZE))
-        self.resultLabel = Label(frame, text='Result', font="Helvetica {}".format(GUI_FONT_SIZE))
-        self.first_sentence_label = Label(frame, text='Sentence 1',
+        self.resultLabel = Label(self.frame, text='Result',
+                                 font="Helvetica {}".format(GUI_FONT_SIZE))
+        self.first_sentence_label = Label(self.frame, text='Sentence 1',
                                           font="Helvetica {}".format(GUI_FONT_SIZE))
-        self.second_sentence_label = Label(frame, text='Sentence 2',
+        self.second_sentence_label = Label(self.frame, text='Sentence 2',
                                            font="Helvetica {}".format(GUI_FONT_SIZE))
         
         self.main_config = init_config()
         self.model_dir = str(self.main_config['DATA']['model_dir'])
         
         model_dirs = [os.path.basename(x[0]) for x in os.walk(self.model_dir)]
+        
+        self.visualize_attentions = IntVar()
+        self.visualize_attentions_checkbox = Checkbutton(master, text="Visualize attention weights",
+                                                         font="Helvetica {}".format(
+                                                             int(GUI_FONT_SIZE / 2)),
+                                                         variable=self.visualize_attentions,
+                                                         onvalue=1, offvalue=0)
         
         variable = StringVar(master)
         variable.set('Choose a model...')
@@ -75,7 +84,18 @@ class MultiheadSiameseNetGuiDemo:
             x2_sen = self.vectorizer.vectorize(sentence2)
             feed_dict = {self.model.x1: x1_sen, self.model.x2: x2_sen,
                          self.model.is_training: False}
-            prediction = np.squeeze(self.session.run([self.model.predictions], feed_dict=feed_dict))
+            
+            if self.visualize_attentions.get():
+                prediction, at1, at2 = np.squeeze(
+                    self.session.run(
+                        [self.model.predictions, self.model.debug_vars['attentions_x1'],
+                         self.model.debug_vars['attentions_x2']], feed_dict=feed_dict))
+                visualization.visualize_attention_weights(at1, sentence1)
+                visualization.visualize_attention_weights(at2, sentence2)
+            else:
+                prediction = np.squeeze(
+                    self.session.run(self.model.predictions, feed_dict=feed_dict))
+            
             prediction = np.round(prediction, 2)
             self.resultLabel['text'] = prediction
             if prediction < 0.5:
@@ -91,6 +111,10 @@ class MultiheadSiameseNetGuiDemo:
         self.resultLabel['text'] = ''
     
     def load_model(self, model_name):
+        if 'multihead' in model_name:
+            self.visualize_attentions_checkbox.grid(row=2, column=0, sticky=W + E, ipady=1)
+        else:
+            self.visualize_attentions_checkbox.grid_forget()
         tf.reset_default_graph()
         self.session = tf.Session()
         logger.info('Loading model: %s', model_name)

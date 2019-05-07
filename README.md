@@ -143,6 +143,16 @@ The below pictures presents Multihead Siamese Nets GUI for:
 2. Negative example:
 
 ![](https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/negative_sample.png)
+
+# Attention weights visualization
+In order to visualize multihead attention weights for compared sentences use GUI demo - check 
+'Visualize attention weights' checkbox which is visible after choosing model based on multihead attention mechanism.
+
+The example of attention weights visualization looks as follows (4 attention heads):
+
+![](https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/attention1.png) 
+![](https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/attention2.png) 
+
 # Comparison of models
 
 Experiments performed on GPU **Nvidia GeForce GTX 1080Ti**.
