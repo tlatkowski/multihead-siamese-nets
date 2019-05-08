@@ -138,11 +138,15 @@ python3 gui_demo.py
 The below pictures presents Multihead Siamese Nets GUI for:
 1. Positive example:
 
-![](https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/positive_sample.png)
+<p align="center">
+  <img width="530" height="120" src="https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/positive_sample.png">
+</p>
 
 2. Negative example:
 
-![](https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/negative_sample.png)
+<p align="center">
+  <img width="530" height="120" src="https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/negative_sample.png">
+</p>
 
 # Attention weights visualization
 In order to visualize multihead attention weights for compared sentences use GUI demo - check 
