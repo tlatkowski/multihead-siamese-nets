@@ -10,6 +10,7 @@ The main reason of creating this repository is to compare well-known implementai
 
 # Supported datasets
 Current version of pipeline supports working with 2 datasets:
+- :new: Adversarial Natural Language Inference (ANLI) benchmark: [GitHub](https://github.com/facebookresearch/anli/), [arXiv](https://arxiv.org/pdf/1910.14599.pdf)
 - [The Stanford Natural Language Inference (SNLI) Corpus](https://nlp.stanford.edu/projects/snli/)
 - [Quora Question Pairs](https://www.kaggle.com/c/quora-question-pairs)
 
