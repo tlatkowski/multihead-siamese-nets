@@ -79,12 +79,14 @@ class Dataset:
         train_idxs = np.arange(len(self._train_labels))
         np.random.shuffle(train_idxs)
         train_idxs = train_idxs[:self.num_dev_instances()]
-        return self.train_sen1[train_idxs], self.train_sen2[train_idxs], self._train_labels[
-            train_idxs]
-    
-    def __str__(self):
-        return 'Dataset properties:\n ' \
-               'Number of training instances: {}\n ' \
-               'Number of dev instances: {}\n ' \
-               'Number of test instances: {}\n' \
-            .format(len(self._train_labels), len(self._dev_labels), len(self._test_labels))
+        mini_train1 = self.train_sen1[train_idxs]
+        mini_train2 = self.train_sen2[train_idxs]
+        mini_labels = self._train_labels[train_idxs]
+        return mini_train1, mini_train2, mini_labels
+        
+        def __str__(self):
+            return 'Dataset properties:\n ' \
+                   'Number of training instances: {}\n ' \
+                   'Number of dev instances: {}\n ' \
+                   'Number of test instances: {}\n' \
+                .format(len(self._train_labels), len(self._dev_labels), len(self._test_labels))

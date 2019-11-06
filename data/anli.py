@@ -1,5 +1,8 @@
-import pandas as pd
+import os
+
 import jsonlines
+import pandas as pd
+
 from data import dataset
 
 
@@ -7,10 +10,25 @@ class ANLIDataset(dataset.DatasetExperiment):
     
     def __init__(self, *args):
         super().__init__(*args)
-        with jsonlines.open('./corpora/anli_v0.1/R3/test.jsonl') as jsonl_reader:
-            for o in jsonl_reader:
-                print(o)
+        self.hypothesis = []
+        self.reason = []
+        self.label = []
+        with jsonlines.open(os.path.join(self.data_dir, 'train.jsonl')) as jsonl_reader:
+            for instance in jsonl_reader:
+                self.hypothesis.append(instance['hypothesis'])
+                self.reason.append(instance['reason'])
+                self.label.append(instance['label'])
         
+        dataset = pd.DataFrame(
+            list(
+                zip(
+                    self.hypothesis,
+                    self.reason,
+                    self.label,
+                )
+            ),
+            columns=['hypothesis', 'reason', 'label']
+        )
         num_instances = len(dataset)
         self.num_train = num_instances * (1 - self.dev_ratio - self.test_ratio)
         self.num_dev = num_instances * self.dev_ratio
@@ -24,28 +42,28 @@ class ANLIDataset(dataset.DatasetExperiment):
         return self.train
     
     def train_set_pairs(self):
-        return self.train[['question1', 'question2']].as_matrix()
+        return self.train[['hypothesis', 'reason']].as_matrix()
     
     def train_labels(self):
-        return self.train['is_duplicate'].as_matrix()
+        return pd.get_dummies(self.train['label']).as_matrix()
     
     def dev_set(self):
         return self.dev
     
     def dev_set_pairs(self):
-        return self.dev[['question1', 'question2']].as_matrix()
+        return self.dev[['hypothesis', 'reason']].as_matrix()
     
     def dev_labels(self):
-        return self.dev['is_duplicate'].as_matrix()
+        return self.dev['label'].as_matrix()
     
     def test_set(self):
         return self.test
     
     def test_set_pairs(self):
-        return self.test[['question1', 'question2']].as_matrix()
+        return self.test[['hypothesis', 'reason']].as_matrix()
     
     def test_labels(self):
-        return self.test['is_duplicate'].as_matrix()
+        return self.test['label'].as_matrix()
     
     def _data_path(self):
-        return 'corpora/QQP/'
+        return 'corpora/ANLI/R3'

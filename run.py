@@ -15,6 +15,8 @@ from utils.model_evaluator import ModelEvaluator
 from utils.model_saver import ModelSaver
 from utils.other_utils import timer, set_visible_gpu, init_config
 
+log = tf.logging.info
+
 
 def train(main_config, model_config, model_name, experiment_name, dataset_name):
     main_cfg = MainConfig(main_config)
@@ -38,8 +40,10 @@ def train(main_config, model_config, model_name, experiment_name, dataset_name):
     num_batches = dataset_helper.num_batches
     model = model(max_sentence_len, vocabulary_size, main_config, model_config)
     model_saver = ModelSaver(main_cfg.model_dir, experiment_name, main_cfg.checkpoints_to_keep)
-    config = tf.ConfigProto(allow_soft_placement=True,
-                            log_device_placement=main_cfg.log_device_placement)
+    config = tf.ConfigProto(
+        allow_soft_placement=True,
+        log_device_placement=main_cfg.log_device_placement,
+    )
     
     with tf.Session(config=config) as session:
         global_step = 0
@@ -50,6 +54,8 @@ def train(main_config, model_config, model_name, experiment_name, dataset_name):
         
         metrics = {'acc': 0.0}
         time_per_epoch = []
+        
+        log('Training model for {} epochs'.format(main_cfg.num_epochs))
         for epoch in tqdm(range(main_cfg.num_epochs), desc='Epochs'):
             start_time = time.time()
             

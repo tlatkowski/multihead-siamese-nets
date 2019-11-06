@@ -17,10 +17,12 @@ class ModelEvaluator:
         accuracy = 0.0
         for batch in range(num_batches):
             x1_batch, x2_batch, y_batch = batch_helper.next(batch)
-            feed_dict = {self._model.x1: x1_batch,
-                         self._model.x2: x2_batch,
-                         self._model.is_training: False,
-                         self._model.labels: y_batch}
+            feed_dict = {
+                self._model.x1: x1_batch,
+                self._model.x2: x2_batch,
+                self._model.is_training: False,
+                self._model.labels: y_batch
+            }
             accuracy += self._session.run(self._model.accuracy, feed_dict=feed_dict)
         accuracy /= num_batches
         return accuracy
