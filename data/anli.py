@@ -54,7 +54,7 @@ class ANLIDataset(dataset.DatasetExperiment):
         return self.dev[['hypothesis', 'reason']].as_matrix()
     
     def dev_labels(self):
-        return self.dev['label'].as_matrix()
+        return pd.get_dummies(self.dev['label']).as_matrix()
     
     def test_set(self):
         return self.test
@@ -63,7 +63,7 @@ class ANLIDataset(dataset.DatasetExperiment):
         return self.test[['hypothesis', 'reason']].as_matrix()
     
     def test_labels(self):
-        return self.test['label'].as_matrix()
+        return pd.get_dummies(self.test['label']).as_matrix()
     
     def _data_path(self):
         return 'corpora/ANLI/R3'
