@@ -9,22 +9,24 @@ This repository contains implementation of Siamese Neural Networks in Tensorflow
 The main reason of creating this repository is to compare well-known implementaions of Siamese Neural Networks available on GitHub mainly built upon CNN and RNN architectures with Siamese Neural Network built based on multihead attention mechanism originally proposed in Transformer model from [Attention is all you need](https://papers.nips.cc/paper/7181-attention-is-all-you-need.pdf) paper.
 
 # Supported datasets
-Current version of pipeline supports working with 2 datasets:
-- :new: Adversarial Natural Language Inference (ANLI) benchmark: [GitHub](https://github.com/facebookresearch/anli/), [arXiv](https://arxiv.org/pdf/1910.14599.pdf)
+Current version of pipeline supports working with **3** datasets:
 - [The Stanford Natural Language Inference (SNLI) Corpus](https://nlp.stanford.edu/projects/snli/)
 - [Quora Question Pairs](https://www.kaggle.com/c/quora-question-pairs)
+- :new: Adversarial Natural Language Inference (ANLI) benchmark: [GitHub](https://github.com/facebookresearch/anli/), [arXiv](https://arxiv.org/pdf/1910.14599.pdf)
 
 # Installation
 
 ### Data preparation
 
-In order to download data, execute the following commands (this process can take a while depending on your network throughput):
+In order to download data, execute the following commands 
+(this process can take a while depending on your network throughput):
 ```
 cd bin
 chmod a+x prepare_data.sh
 ./prepare_data.sh
 ```
-As as result of executing above script, **corpora** directory will be created with **QQP** and **SNLI** data.
+As as result of executing above script, **corpora** directory
+ will be created with **QQP**, **SNLI** and **ANLI** data.
 
 ### Dependency installation
 This project was developed in and has been tested on **Python 3.6**. The package requirements are stored in **requirements** folder.
@@ -55,6 +57,7 @@ where **SELECTED_MODEL** represents one of the selected model among:
 and **SELECTED_DATASET** is represented by:
 - SNLI
 - QQP
+- ANLI
 
 **--experiment_name** is an optional argument used for indicating experiment name. Default value **{SELECTED_MODEL}_{EMBEDDING_SIZE}**. 
 
