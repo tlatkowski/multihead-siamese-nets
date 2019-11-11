@@ -15,10 +15,17 @@ class ANLIDataset(dataset.DatasetExperiment):
         self.label = []
         with jsonlines.open(os.path.join(self.data_dir, 'train.jsonl')) as jsonl_reader:
             for instance in jsonl_reader:
+                if instance['label'] is 'n':
+                    continue
                 self.hypothesis.append(instance['hypothesis'])
                 self.reason.append(instance['reason'])
-                self.label.append(instance['label'])
-        
+                if instance['label'] is 'e':
+                    self.label.append(0)
+                else:
+                    self.label.append(1)
+                print('{} - {} - {}'.format(instance['hypothesis'], instance['reason'],
+                                            instance['label']))
+        print(set(self.label))
         dataset = pd.DataFrame(
             list(
                 zip(
@@ -45,7 +52,7 @@ class ANLIDataset(dataset.DatasetExperiment):
         return self.train[['hypothesis', 'reason']].as_matrix()
     
     def train_labels(self):
-        return pd.get_dummies(self.train['label']).as_matrix()
+        return self.train['label'].as_matrix()
     
     def dev_set(self):
         return self.dev
@@ -54,7 +61,7 @@ class ANLIDataset(dataset.DatasetExperiment):
         return self.dev[['hypothesis', 'reason']].as_matrix()
     
     def dev_labels(self):
-        return pd.get_dummies(self.dev['label']).as_matrix()
+        return self.dev['label'].as_matrix()
     
     def test_set(self):
         return self.test
@@ -63,7 +70,7 @@ class ANLIDataset(dataset.DatasetExperiment):
         return self.test[['hypothesis', 'reason']].as_matrix()
     
     def test_labels(self):
-        return pd.get_dummies(self.test['label']).as_matrix()
+        return self.test['label'].as_matrix()
     
     def _data_path(self):
-        return 'corpora/ANLI/R3'
+        return 'corpora/ANLI/anli_v0.1/R3'
