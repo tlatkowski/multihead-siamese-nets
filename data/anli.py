@@ -23,9 +23,7 @@ class ANLIDataset(dataset.DatasetExperiment):
                     self.label.append(0)
                 else:
                     self.label.append(1)
-                print('{} - {} - {}'.format(instance['hypothesis'], instance['reason'],
-                                            instance['label']))
-        print(set(self.label))
+        
         dataset = pd.DataFrame(
             list(
                 zip(

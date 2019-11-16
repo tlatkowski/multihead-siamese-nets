@@ -84,9 +84,9 @@ class Dataset:
         mini_labels = self._train_labels[train_idxs]
         return mini_train1, mini_train2, mini_labels
         
-        def __str__(self):
-            return 'Dataset properties:\n ' \
-                   'Number of training instances: {}\n ' \
-                   'Number of dev instances: {}\n ' \
-                   'Number of test instances: {}\n' \
-                .format(len(self._train_labels), len(self._dev_labels), len(self._test_labels))
+    def __str__(self):
+        return 'Dataset properties:\n ' \
+               'Number of training instances: {}\n ' \
+               'Number of dev instances: {}\n ' \
+               'Number of test instances: {}\n' \
+            .format(len(self._train_labels), len(self._dev_labels), len(self._test_labels))

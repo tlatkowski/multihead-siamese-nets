@@ -3,8 +3,15 @@ import tensorflow as tf
 from layers.basics import linear, dropout, feed_forward, residual
 
 
-def stacked_multihead_attention(x, num_blocks, num_heads, use_residual, is_training, dropout_rate,
-                                reuse=False):
+def stacked_multihead_attention(
+        x,
+        num_blocks,
+        num_heads,
+        use_residual,
+        is_training,
+        dropout_rate,
+        reuse=False,
+):
     num_hiddens = x.get_shape().as_list()[-1]
     with tf.variable_scope('stacked_multihead_attention', reuse=reuse):
         for i in range(num_blocks):
@@ -15,8 +22,17 @@ def stacked_multihead_attention(x, num_blocks, num_heads, use_residual, is_train
     return x, attentions
 
 
-def multihead_attention(queries, keys, values, use_residual, is_training, dropout_rate,
-                        num_units=None, num_heads=8, reuse=False):
+def multihead_attention(
+        queries,
+        keys,
+        values,
+        use_residual,
+        is_training,
+        dropout_rate,
+        num_units=None,
+        num_heads=8,
+        reuse=False,
+):
     with tf.variable_scope('multihead-attention', reuse=reuse):
         if num_units is None:
             num_units = queries.get_shape().as_list()[-1]
@@ -41,7 +57,13 @@ def multihead_attention(queries, keys, values, use_residual, is_training, dropou
     return output, attentions
 
 
-def scaled_dot_product_attention(queries, keys, values, sequence_length=None, reuse=False):
+def scaled_dot_product_attention(
+        queries,
+        keys,
+        values,
+        sequence_length=None,
+        reuse=False,
+):
     if sequence_length is None:
         sequence_length = tf.to_float(queries.get_shape().as_list()[-1])
     

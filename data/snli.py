@@ -22,8 +22,13 @@ class SNLIDataset(dataset.DatasetExperiment):
     
     def __init__(self, *args):
         super().__init__(*args)
-        dataset = pd.read_csv('{}{}'.format(self.data_dir, 'train_snli.txt'),
-                              delimiter='\t', header=None, names=columns, na_values='')
+        dataset = pd.read_csv(
+            '{}{}'.format(self.data_dir, 'train_snli.txt'),
+            delimiter='\t',
+            header=None,
+            names=columns,
+            na_values='',
+        )
         dataset.dropna(inplace=True)
         dataset = dataset.sample(frac=1, random_state=1).reset_index(drop=True)
         num_instances = len(dataset)
