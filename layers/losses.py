@@ -1,4 +1,5 @@
 import tensorflow as tf
+
 from layers.similarity import manhattan_distance
 
 
@@ -31,6 +32,6 @@ def mse(predictions, labels):
 
 def contrastive_lecun(x1, x2, labels, margin=0.2, distance=manhattan_distance):
     labels = tf.to_float(labels)
-    c_loss = labels * 0.5 * tf.square(distance(x1, x2)) +\
+    c_loss = labels * 0.5 * tf.square(distance(x1, x2)) + \
              (1 - labels) * 0.5 * tf.square(tf.maximum(0.0, margin - distance(x1, x2)))
     return tf.reduce_sum(c_loss)
