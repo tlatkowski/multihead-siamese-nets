@@ -6,6 +6,7 @@ from tqdm import tqdm
 
 from data import dataset_type
 from data.dataset import Dataset
+from models import model_type
 from models.model_type import MODELS
 from utils.batch_helper import BatchHelper
 from utils.config_helpers import MainConfig
@@ -18,7 +19,21 @@ from utils.other_utils import timer, set_visible_gpu, init_config
 log = tf.logging.info
 
 
-def train(main_config, model_config, model_name, experiment_name, dataset_name):
+def create_experiment_name(model_name, main_config, model_config):
+    experiment_name = '{}_{}'.format(model_name, main_config['PARAMS']['embedding_size'])
+    if model_name == model_type.ModelType.rnn.name:
+        experiment_name += ("_" + model_config['PARAMS']['cell_type'])
+    
+    return experiment_name
+
+
+def train(
+        main_config,
+        model_config,
+        model_name,
+        experiment_name,
+        dataset_name,
+):
     main_cfg = MainConfig(main_config)
     model = MODELS[model_name]
     dataset = dataset_type.get_dataset(dataset_name)
@@ -38,8 +53,17 @@ def train(main_config, model_config, model_name, experiment_name, dataset_name):
     test_labels = test_labels.reshape(-1, 1)
     
     num_batches = dataset_helper.num_batches
-    model = model(max_sentence_len, vocabulary_size, main_config, model_config)
-    model_saver = ModelSaver(main_cfg.model_dir, experiment_name, main_cfg.checkpoints_to_keep)
+    model = model(
+        max_sentence_len,
+        vocabulary_size,
+        main_config,
+        model_config,
+    )
+    model_saver = ModelSaver(
+        main_cfg.model_dir,
+        experiment_name,
+        main_cfg.checkpoints_to_keep,
+    )
     config = tf.ConfigProto(
         allow_soft_placement=True,
         log_device_placement=main_cfg.log_device_placement,
@@ -49,7 +73,12 @@ def train(main_config, model_config, model_name, experiment_name, dataset_name):
         global_step = 0
         init = tf.global_variables_initializer()
         session.run(init)
-        log_saver = LogSaver(main_cfg.logs_path, experiment_name, dataset_name, session.graph)
+        log_saver = LogSaver(
+            main_cfg.logs_path,
+            experiment_name,
+            dataset_name,
+            session.graph,
+        )
         model_evaluator = ModelEvaluator(model, session)
         
         metrics = {'acc': 0.0}
@@ -62,8 +91,12 @@ def train(main_config, model_config, model_name, experiment_name, dataset_name):
             train_sentence1, train_sentence2 = dataset_helper.train_instances(shuffle=True)
             train_labels = dataset_helper.train_labels()
             
-            train_batch_helper = BatchHelper(train_sentence1, train_sentence2, train_labels,
-                                             main_cfg.batch_size)
+            train_batch_helper = BatchHelper(
+                train_sentence1,
+                train_sentence2,
+                train_labels,
+                main_cfg.batch_size,
+            )
             
             # small eval set for measuring dev accuracy
             dev_sentence1, dev_sentence2, dev_labels = dataset_helper.dev_instances()
@@ -74,35 +107,46 @@ def train(main_config, model_config, model_name, experiment_name, dataset_name):
             for batch in tqdm_iter:
                 global_step += 1
                 sentence1_batch, sentence2_batch, labels_batch = train_batch_helper.next(batch)
-                feed_dict_train = {model.x1: sentence1_batch,
-                                   model.x2: sentence2_batch,
-                                   model.is_training: True,
-                                   model.labels: labels_batch}
+                feed_dict_train = {
+                    model.x1: sentence1_batch,
+                    model.x2: sentence2_batch,
+                    model.is_training: True,
+                    model.labels: labels_batch,
+                }
                 loss, _ = session.run([model.loss, model.opt], feed_dict=feed_dict_train)
                 
                 if batch % main_cfg.eval_every == 0:
-                    feed_dict_train = {model.x1: train_mini_sen1,
-                                       model.x2: train_mini_sen2,
-                                       model.is_training: False,
-                                       model.labels: train_mini_labels}
+                    feed_dict_train = {
+                        model.x1: train_mini_sen1,
+                        model.x2: train_mini_sen2,
+                        model.is_training: False,
+                        model.labels: train_mini_labels,
+                    }
                     
-                    train_accuracy, train_summary = session.run([model.accuracy, model.summary_op],
-                                                                feed_dict=feed_dict_train)
+                    train_accuracy, train_summary = session.run(
+                        [model.accuracy, model.summary_op],
+                        feed_dict=feed_dict_train,
+                    )
                     log_saver.log_train(train_summary, global_step)
                     
-                    feed_dict_dev = {model.x1: dev_sentence1,
-                                     model.x2: dev_sentence2,
-                                     model.is_training: False,
-                                     model.labels: dev_labels}
+                    feed_dict_dev = {
+                        model.x1: dev_sentence1,
+                        model.x2: dev_sentence2,
+                        model.is_training: False,
+                        model.labels: dev_labels
+                    }
                     
-                    dev_accuracy, dev_summary = session.run([model.accuracy, model.summary_op],
-                                                            feed_dict=feed_dict_dev)
+                    dev_accuracy, dev_summary = session.run(
+                        [model.accuracy, model.summary_op],
+                        feed_dict=feed_dict_dev,
+                    )
                     log_saver.log_dev(dev_summary, global_step)
                     tqdm_iter.set_postfix(
                         dev_acc='{:.2f}'.format(float(dev_accuracy)),
                         train_acc='{:.2f}'.format(float(train_accuracy)),
                         loss='{:.2f}'.format(float(loss)),
-                        epoch=epoch)
+                        epoch=epoch
+                    )
                 
                 if global_step % main_cfg.save_every == 0:
                     model_saver.save(session, global_step=global_step)
@@ -183,7 +227,7 @@ def main():
     
     experiment_name = args.experiment_name
     if experiment_name is None:
-        experiment_name = '{}_{}'.format(args.model, main_config['PARAMS']['embedding_size'])
+        experiment_name = create_experiment_name(args.model, main_config, model_config)
     
     if 'train' in mode:
         train(main_config, model_config, args.model, experiment_name, args.dataset)
