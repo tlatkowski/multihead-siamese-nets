@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from models.lstm import manhattan_similarity
+from models.rnn import manhattan_similarity
 
 
 class TestSimilarity(tf.test.TestCase):

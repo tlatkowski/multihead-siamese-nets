@@ -1,6 +1,6 @@
 from enum import Enum
 from models.cnn import CnnSiameseNet
-from models.lstm import LSTMBasedSiameseNet
+from models.rnn import LSTMBasedSiameseNet
 from models.multihead_attention import MultiheadAttentionSiameseNet
 
 
