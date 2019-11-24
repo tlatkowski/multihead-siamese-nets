@@ -1,6 +1,27 @@
+import enum
+
 import tensorflow as tf
 
 from layers.similarity import manhattan_distance
+
+_EPSILON = 1e-6
+
+
+class LossType(enum.Enum):
+    MSE = 0,
+    MAE = 1,
+    CROSS_ENTROPY = 2,
+
+
+def get_loss_function(loss_type: str):
+    if loss_type == LossType.MSE.name:
+        return mse
+    elif loss_type == LossType.MAE.name:
+        return mae
+    elif loss_type == LossType.CROSS_ENTROPY.name:
+        return cross_entropy
+    else:
+        raise AttributeError('{} loss type not supported.'.format(loss_type))
 
 
 def contrastive(predictions, labels):
@@ -20,14 +41,22 @@ def _contrastive_minus(model_energy, margin=tf.constant(0.5)):
 
 
 def cross_entropy(predictions, labels):
-    # TODO add epsilon to cross entropy stability
     labels = tf.cast(labels, "float")
     predictions = tf.cast(predictions, "float")
-    return tf.reduce_mean(-tf.reduce_sum(labels * tf.log(predictions), axis=1))
+    return tf.reduce_mean(
+        -tf.reduce_sum(
+            labels * tf.log(predictions + _EPSILON),
+            axis=1
+        )
+    )
 
 
 def mse(predictions, labels):
     return tf.losses.mean_squared_error(labels, predictions)
+
+
+def mae(predictions, labels):
+    return tf.reduce_mean(tf.losses.absolute_difference(labels, predictions))
 
 
 def contrastive_lecun(x1, x2, labels, margin=0.2, distance=manhattan_distance):
