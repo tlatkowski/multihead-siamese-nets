@@ -24,6 +24,8 @@ def create_experiment_name(model_name, main_config, model_config):
     if model_name == model_type.ModelType.rnn.name:
         experiment_name += ("_" + model_config['PARAMS']['cell_type'])
     
+    experiment_name += ("_" + main_config['PARAMS']['loss_function'])
+    
     return experiment_name
 
 
@@ -39,7 +41,11 @@ def train(
     dataset = dataset_type.get_dataset(dataset_name)
     
     train_data = dataset.train_set_pairs()
-    vectorizer = DatasetVectorizer(main_cfg.model_dir, raw_sentence_pairs=train_data)
+    vectorizer = DatasetVectorizer(
+        model_dir=main_cfg.model_dir,
+        char_embeddings=main_cfg.char_embeddings,
+        raw_sentence_pairs=train_data,
+    )
     
     dataset_helper = Dataset(vectorizer, dataset, main_cfg.batch_size)
     max_sentence_len = vectorizer.max_sentence_len
@@ -60,9 +66,9 @@ def train(
         model_config,
     )
     model_saver = ModelSaver(
-        main_cfg.model_dir,
-        experiment_name,
-        main_cfg.checkpoints_to_keep,
+        model_dir=main_cfg.model_dir,
+        model_name=experiment_name,
+        checkpoints_to_keep=main_cfg.checkpoints_to_keep,
     )
     config = tf.ConfigProto(
         allow_soft_placement=True,
@@ -151,7 +157,11 @@ def train(
                 if global_step % main_cfg.save_every == 0:
                     model_saver.save(session, global_step=global_step)
             
-            model_evaluator.evaluate_dev(dev_sentence1, dev_sentence2, dev_labels)
+            model_evaluator.evaluate_dev(
+                x1=dev_sentence1,
+                x2=dev_sentence2,
+                labels=dev_labels,
+            )
             
             end_time = time.time()
             total_time = timer(start_time, end_time)
@@ -160,15 +170,31 @@ def train(
             model_saver.save(session, global_step=global_step)
         
         model_evaluator.evaluate_test(test_sentence1, test_sentence2, test_labels)
-        model_evaluator.save_evaluation('{}/{}'.format(main_cfg.model_dir, experiment_name),
-                                        time_per_epoch[-1], dataset)
+        model_evaluator.save_evaluation(
+            model_path='{}/{}'.format(
+                main_cfg.model_dir,
+                experiment_name,
+            ),
+            epoch_time=time_per_epoch[-1],
+            dataset=dataset,
+        )
 
 
-def predict(main_config, model_config, model, experiment_name):
+def predict(
+        main_config,
+        model_config,
+        model,
+        experiment_name,
+):
     model = MODELS[model]
-    model_dir = str(main_config['DATA']['model_dir'])
+    main_cfg = MainConfig(main_config)
     
-    vectorizer = DatasetVectorizer(model_dir)
+    # model_dir = str(main_config['DATA']['model_dir'])
+    
+    vectorizer = DatasetVectorizer(
+        model_dir=main_cfg.model_dir,
+        char_embeddings=main_cfg.char_embeddings,
+    )
     
     max_doc_len = vectorizer.max_sentence_len
     vocabulary_size = vectorizer.vocabulary_size
@@ -177,7 +203,12 @@ def predict(main_config, model_config, model, experiment_name):
     
     with tf.Session() as session:
         saver = tf.train.Saver()
-        last_checkpoint = tf.train.latest_checkpoint('{}/{}'.format(model_dir, experiment_name))
+        last_checkpoint = tf.train.latest_checkpoint(
+            '{}/{}'.format(
+                main_cfg.model_dir,
+                experiment_name,
+            )
+        )
         saver.restore(session, last_checkpoint)
         while True:
             x1 = input('First sentence:')
@@ -193,26 +224,36 @@ def predict(main_config, model_config, model, experiment_name):
 def main():
     parser = ArgumentParser()
     
-    parser.add_argument('mode',
-                        choices=['train', 'predict'],
-                        help='pipeline mode')
+    parser.add_argument(
+        'mode',
+        choices=['train', 'predict'],
+        help='pipeline mode',
+    )
     
-    parser.add_argument('model',
-                        choices=['rnn', 'cnn', 'multihead'],
-                        help='model to be used')
+    parser.add_argument(
+        'model',
+        choices=['rnn', 'cnn', 'multihead'],
+        help='model to be used',
+    )
     
-    parser.add_argument('dataset',
-                        choices=['QQP', 'SNLI', 'ANLI'],
-                        nargs='?',
-                        help='dataset to be used')
+    parser.add_argument(
+        'dataset',
+        choices=['QQP', 'SNLI', 'ANLI'],
+        nargs='?',
+        help='dataset to be used',
+    )
     
-    parser.add_argument('--experiment_name',
-                        required=False,
-                        help='the name of run experiment')
+    parser.add_argument(
+        '--experiment_name',
+        required=False,
+        help='the name of run experiment',
+    )
     
-    parser.add_argument('--gpu',
-                        default='0',
-                        help='index of GPU to be used (default: %(default))')
+    parser.add_argument(
+        '--gpu',
+        default='0',
+        help='index of GPU to be used (default: %(default))',
+    )
     
     args = parser.parse_args()
     if 'train' in args.mode:
