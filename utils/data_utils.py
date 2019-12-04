@@ -1,11 +1,10 @@
-import logging
 import os
 
 import numpy as np
+import tensorflow as tf
 from tflearn.data_utils import VocabularyProcessor
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+log = tf.logging.info
 
 
 class DatasetVectorizer:
@@ -19,19 +18,26 @@ class DatasetVectorizer:
             raw_sentence_pairs = raw_sentence_pairs.ravel()
             raw_sentence_pairs = [str(x) for x in list(raw_sentence_pairs)]
             if char_embeddings:
+                log('Chosen char embeddings.')
                 self.sentences_lengths = [len(list(str(x))) for x in list(raw_sentence_pairs)]
             else:
+                log('Chosen word embeddings.')
                 self.sentences_lengths = [len(str(x).split(' ')) for x in list(raw_sentence_pairs)]
             max_sentence_length = max(self.sentences_lengths)
+            log('Maximum sentence length : {}'.format(max_sentence_length))
+            
             if char_embeddings:
+                log('Processing sentences with char embeddings...')
                 self.vocabulary = VocabularyProcessor(
                     max_document_length=max_sentence_length,
                     tokenizer_fn=char_tokenizer,
                 )
             else:
+                logger.info('Processing sentences with word embeddings...')
                 self.vocabulary = VocabularyProcessor(
                     max_document_length=max_sentence_length,
                 )
+            log('Sentences have been successfully processed.')
             self.vocabulary.fit(raw_sentence_pairs)
             if save_vocab:
                 self.vocabulary.save('{}/vocab'.format(self.model_dir))

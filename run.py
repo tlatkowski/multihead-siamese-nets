@@ -23,9 +23,9 @@ def create_experiment_name(model_name, main_config, model_config):
     experiment_name = '{}_{}'.format(model_name, main_config['PARAMS']['embedding_size'])
     if model_name == model_type.ModelType.rnn.name:
         experiment_name += ("_" + model_config['PARAMS']['cell_type'])
-
+    
     experiment_name += ("_" + main_config['PARAMS']['loss_function'])
-
+    
     return experiment_name
 
 
@@ -157,7 +157,11 @@ def train(
                 if global_step % main_cfg.save_every == 0:
                     model_saver.save(session, global_step=global_step)
             
-            model_evaluator.evaluate_dev(dev_sentence1, dev_sentence2, dev_labels)
+            model_evaluator.evaluate_dev(
+                x1=dev_sentence1,
+                x2=dev_sentence2,
+                labels=dev_labels,
+            )
             
             end_time = time.time()
             total_time = timer(start_time, end_time)
@@ -166,8 +170,14 @@ def train(
             model_saver.save(session, global_step=global_step)
         
         model_evaluator.evaluate_test(test_sentence1, test_sentence2, test_labels)
-        model_evaluator.save_evaluation('{}/{}'.format(main_cfg.model_dir, experiment_name),
-                                        time_per_epoch[-1], dataset)
+        model_evaluator.save_evaluation(
+            model_path='{}/{}'.format(
+                main_cfg.model_dir,
+                experiment_name,
+            ),
+            epoch_time=time_per_epoch[-1],
+            dataset=dataset,
+        )
 
 
 def predict(
@@ -178,7 +188,7 @@ def predict(
 ):
     model = MODELS[model]
     main_cfg = MainConfig(main_config)
-
+    
     # model_dir = str(main_config['DATA']['model_dir'])
     
     vectorizer = DatasetVectorizer(
