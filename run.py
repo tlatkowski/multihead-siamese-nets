@@ -23,7 +23,9 @@ def create_experiment_name(model_name, main_config, model_config):
     experiment_name = '{}_{}'.format(model_name, main_config['PARAMS']['embedding_size'])
     if model_name == model_type.ModelType.rnn.name:
         experiment_name += ("_" + model_config['PARAMS']['cell_type'])
-    
+
+    experiment_name += ("_" + main_config['PARAMS']['loss_function'])
+
     return experiment_name
 
 
@@ -164,7 +166,12 @@ def train(
                                         time_per_epoch[-1], dataset)
 
 
-def predict(main_config, model_config, model, experiment_name):
+def predict(
+        main_config,
+        model_config,
+        model,
+        experiment_name,
+):
     model = MODELS[model]
     model_dir = str(main_config['DATA']['model_dir'])
     
@@ -193,26 +200,36 @@ def predict(main_config, model_config, model, experiment_name):
 def main():
     parser = ArgumentParser()
     
-    parser.add_argument('mode',
-                        choices=['train', 'predict'],
-                        help='pipeline mode')
+    parser.add_argument(
+        'mode',
+        choices=['train', 'predict'],
+        help='pipeline mode',
+    )
     
-    parser.add_argument('model',
-                        choices=['rnn', 'cnn', 'multihead'],
-                        help='model to be used')
+    parser.add_argument(
+        'model',
+        choices=['rnn', 'cnn', 'multihead'],
+        help='model to be used',
+    )
     
-    parser.add_argument('dataset',
-                        choices=['QQP', 'SNLI', 'ANLI'],
-                        nargs='?',
-                        help='dataset to be used')
+    parser.add_argument(
+        'dataset',
+        choices=['QQP', 'SNLI', 'ANLI'],
+        nargs='?',
+        help='dataset to be used',
+    )
     
-    parser.add_argument('--experiment_name',
-                        required=False,
-                        help='the name of run experiment')
+    parser.add_argument(
+        '--experiment_name',
+        required=False,
+        help='the name of run experiment',
+    )
     
-    parser.add_argument('--gpu',
-                        default='0',
-                        help='index of GPU to be used (default: %(default))')
+    parser.add_argument(
+        '--gpu',
+        default='0',
+        help='index of GPU to be used (default: %(default))',
+    )
     
     args = parser.parse_args()
     if 'train' in args.mode:
