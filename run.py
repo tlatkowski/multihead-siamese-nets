@@ -41,7 +41,11 @@ def train(
     dataset = dataset_type.get_dataset(dataset_name)
     
     train_data = dataset.train_set_pairs()
-    vectorizer = DatasetVectorizer(main_cfg.model_dir, raw_sentence_pairs=train_data)
+    vectorizer = DatasetVectorizer(
+        model_dir=main_cfg.model_dir,
+        char_embeddings=main_cfg.char_embeddings,
+        raw_sentence_pairs=train_data,
+    )
     
     dataset_helper = Dataset(vectorizer, dataset, main_cfg.batch_size)
     max_sentence_len = vectorizer.max_sentence_len
@@ -62,9 +66,9 @@ def train(
         model_config,
     )
     model_saver = ModelSaver(
-        main_cfg.model_dir,
-        experiment_name,
-        main_cfg.checkpoints_to_keep,
+        model_dir=main_cfg.model_dir,
+        model_name=experiment_name,
+        checkpoints_to_keep=main_cfg.checkpoints_to_keep,
     )
     config = tf.ConfigProto(
         allow_soft_placement=True,
@@ -173,9 +177,14 @@ def predict(
         experiment_name,
 ):
     model = MODELS[model]
-    model_dir = str(main_config['DATA']['model_dir'])
+    main_cfg = MainConfig(main_config)
+
+    # model_dir = str(main_config['DATA']['model_dir'])
     
-    vectorizer = DatasetVectorizer(model_dir)
+    vectorizer = DatasetVectorizer(
+        model_dir=main_cfg.model_dir,
+        char_embeddings=main_cfg.char_embeddings,
+    )
     
     max_doc_len = vectorizer.max_sentence_len
     vocabulary_size = vectorizer.vocabulary_size
@@ -184,7 +193,12 @@ def predict(
     
     with tf.Session() as session:
         saver = tf.train.Saver()
-        last_checkpoint = tf.train.latest_checkpoint('{}/{}'.format(model_dir, experiment_name))
+        last_checkpoint = tf.train.latest_checkpoint(
+            '{}/{}'.format(
+                main_cfg.model_dir,
+                experiment_name,
+            )
+        )
         saver.restore(session, last_checkpoint)
         while True:
             x1 = input('First sentence:')
