@@ -33,7 +33,7 @@ class DatasetVectorizer:
                     tokenizer_fn=char_tokenizer,
                 )
             else:
-                logger.info('Processing sentences with word embeddings...')
+                log('Processing sentences with word embeddings...')
                 self.vocabulary = VocabularyProcessor(
                     max_document_length=max_sentence_length,
                 )
