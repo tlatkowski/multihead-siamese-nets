@@ -4,3 +4,4 @@ tflearn==0.3.2
 numpy==1.14.2
 tensorflow==1.15.0
 seaborn==0.9.0
+jsonlines==1.2.0
