@@ -1,10 +1,10 @@
-from layers.convolution import cnn_layers
-from layers.similarity import manhattan_similarity
-from models.base_model import BaseSiameseNet
-from utils.config_helpers import parse_list
+from layers import convolution
+from layers import similarity
+from models import base_model
+from utils import config_helpers
 
 
-class CnnSiameseNet(BaseSiameseNet):
+class CNNSiameseNet(base_model.BaseSiameseNet):
     
     def __init__(
             self,
@@ -13,8 +13,7 @@ class CnnSiameseNet(BaseSiameseNet):
             main_cfg,
             model_cfg,
     ):
-        BaseSiameseNet.__init__(
-            self,
+        super().__init__(
             max_sequence_len,
             vocabulary_size,
             main_cfg,
@@ -22,22 +21,26 @@ class CnnSiameseNet(BaseSiameseNet):
         )
     
     def siamese_layer(self, sequence_len, model_cfg):
-        num_filters = parse_list(model_cfg['PARAMS']['num_filters'])
-        filter_sizes = parse_list(model_cfg['PARAMS']['filter_sizes'])
+        num_filters = config_helpers.parse_list(
+            model_cfg['PARAMS']['num_filters'],
+        )
+        filter_sizes = config_helpers.parse_list(
+            model_cfg['PARAMS']['filter_sizes'],
+        )
         dropout_rate = float(model_cfg['PARAMS']['dropout_rate'])
         
-        out1 = cnn_layers(
-            self.embedded_x1,
-            sequence_len,
+        out1 = convolution.cnn_layers(
+            embedded_x=self.embedded_x1,
+            max_seq_len=sequence_len,
             num_filters=num_filters,
             filter_sizes=filter_sizes,
             is_training=self.is_training,
             dropout_rate=dropout_rate,
         )
         
-        out2 = cnn_layers(
-            self.embedded_x2,
-            sequence_len,
+        out2 = convolution.cnn_layers(
+            embedded_x=self.embedded_x2,
+            max_seq_len=sequence_len,
             num_filters=num_filters,
             filter_sizes=filter_sizes,
             is_training=self.is_training,
@@ -45,4 +48,4 @@ class CnnSiameseNet(BaseSiameseNet):
             reuse=True,
         )
         
-        return manhattan_similarity(out1, out2)
+        return similarity.manhattan_similarity(out1, out2)

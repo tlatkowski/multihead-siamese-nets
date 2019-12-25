@@ -1,5 +1,5 @@
 from enum import Enum
-from models.cnn import CnnSiameseNet
+from models.cnn import CNNSiameseNet
 from models.rnn import LSTMBasedSiameseNet
 from models.multihead_attention import MultiheadAttentionSiameseNet
 
@@ -11,7 +11,7 @@ class ModelType(Enum):
 
 
 MODELS = {
-    ModelType.cnn.name: CnnSiameseNet,
+    ModelType.cnn.name: CNNSiameseNet,
     ModelType.rnn.name: LSTMBasedSiameseNet,
     ModelType.multihead.name: MultiheadAttentionSiameseNet
 }
