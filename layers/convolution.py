@@ -1,4 +1,5 @@
 import tensorflow as tf
+
 from layers.basics import dropout
 
 
@@ -11,20 +12,18 @@ def cnn_layer(
         dropout_rate,
         reuse=False,
 ):
-    embedding_dim = embedded_x.get_shape().as_list()[-1]
-    embedded_x_expanded = tf.expand_dims(embedded_x, -1)
     with tf.variable_scope('convolution', reuse=reuse):
-        convoluted = tf.layers.conv2d(
-            embedded_x_expanded,
+        convoluted = tf.layers.conv1d(
+            inputs=embedded_x,
             filters=num_filters,
-            kernel_size=[filter_size, embedding_dim],
+            kernel_size=[filter_size],
             activation=tf.nn.relu,
         )
     with tf.variable_scope('pooling', reuse=reuse):
-        pooling = tf.layers.max_pooling2d(
-            convoluted,
-            pool_size=[max_seq_len - filter_size + 1, 1],
-            strides=[1, 1],
+        pooling = tf.layers.max_pooling1d(
+            inputs=convoluted,
+            pool_size=[max_seq_len - filter_size + 1],
+            strides=1,
         )
         pooling_flat = tf.reshape(pooling, [-1, num_filters])
     with tf.variable_scope('dropout', reuse=reuse):
