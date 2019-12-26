@@ -10,17 +10,25 @@ class CNNSiameseNet(base_model.BaseSiameseNet):
             self,
             max_sequence_len,
             vocabulary_size,
-            main_cfg,
+            loss_function,
+            embedding_size,
+            learning_rate,
             model_cfg,
     ):
         super().__init__(
             max_sequence_len,
             vocabulary_size,
-            main_cfg,
+            loss_function,
+            embedding_size,
+            learning_rate,
             model_cfg,
         )
     
-    def siamese_layer(self, sequence_len, model_cfg):
+    def siamese_layer(
+            self,
+            sequence_len,
+            model_cfg,
+    ):
         num_filters = config_helpers.parse_list(
             model_cfg['PARAMS']['num_filters'],
         )

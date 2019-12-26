@@ -14,6 +14,7 @@ class LossType(enum.Enum):
 
 
 def get_loss_function(loss_type: str):
+    loss_type = loss_type.upper()
     if loss_type == LossType.MSE.name:
         return mse
     elif loss_type == LossType.MAE.name:

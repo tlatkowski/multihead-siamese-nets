@@ -62,7 +62,8 @@ def train(
     model = model(
         max_sentence_len,
         vocabulary_size,
-        main_config,
+        # main_config,
+        main_cfg,
         model_config,
     )
     model_saver = ModelSaver(

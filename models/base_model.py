@@ -1,7 +1,8 @@
 import tensorflow as tf
 
-from layers.basics import optimize
 from layers import losses
+from layers.basics import optimize
+
 
 class BaseSiameseNet:
     
@@ -9,7 +10,9 @@ class BaseSiameseNet:
             self,
             max_sequence_len,
             vocabulary_size,
-            main_cfg,
+            loss_function,
+            embedding_size,
+            learning_rate,
             model_cfg,
     ):
         self.x1 = tf.placeholder(dtype=tf.int32, shape=[None, max_sequence_len])
@@ -21,13 +24,15 @@ class BaseSiameseNet:
         self.debug = None
         self.debug_vars = dict()
         
-        self.loss_function = losses.get_loss_function(main_cfg['PARAMS'].get('loss_function'))
-        self.embedding_size = main_cfg['PARAMS'].getint('embedding_size')
-        self.learning_rate = main_cfg['TRAINING'].getfloat('learning_rate')
+        self.loss_function = losses.get_loss_function(loss_function)
+        self.embedding_size = embedding_size
+        self.learning_rate = learning_rate
         
         with tf.variable_scope('embeddings'):
-            word_embeddings = tf.get_variable('word_embeddings',
-                                              [vocabulary_size, self.embedding_size])
+            word_embeddings = tf.get_variable(
+                name='word_embeddings',
+                shape=[vocabulary_size, self.embedding_size],
+            )
             self.embedded_x1 = tf.gather(word_embeddings, self.x1)
             self.embedded_x2 = tf.gather(word_embeddings, self.x2)
         
