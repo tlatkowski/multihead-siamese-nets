@@ -59,12 +59,14 @@ def train(
     test_labels = test_labels.reshape(-1, 1)
     
     num_batches = dataset_helper.num_batches
+
     model = model(
-        max_sentence_len,
-        vocabulary_size,
-        # main_config,
-        main_cfg,
-        model_config,
+        max_sequence_len=max_sentence_len,
+        vocabulary_size=vocabulary_size,
+        loss_function=main_cfg.loss_function,
+        embedding_size=main_cfg.embedding_size,
+        learning_rate=main_cfg.learning_rate,
+        model_cfg=model_config,
     )
     model_saver = ModelSaver(
         model_dir=main_cfg.model_dir,

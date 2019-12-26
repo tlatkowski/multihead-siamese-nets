@@ -38,8 +38,7 @@ class CNNSiameseNet(base_model.BaseSiameseNet):
         dropout_rate = float(model_cfg['PARAMS']['dropout_rate'])
         
         out1 = convolution.cnn_layers(
-            embedded_x=self.embedded_x1,
-            max_seq_len=sequence_len,
+            inputs=self.embedded_x1,
             num_filters=num_filters,
             filter_sizes=filter_sizes,
             is_training=self.is_training,
@@ -47,8 +46,7 @@ class CNNSiameseNet(base_model.BaseSiameseNet):
         )
         
         out2 = convolution.cnn_layers(
-            embedded_x=self.embedded_x2,
-            max_seq_len=sequence_len,
+            inputs=self.embedded_x2,
             num_filters=num_filters,
             filter_sizes=filter_sizes,
             is_training=self.is_training,

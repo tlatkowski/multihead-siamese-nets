@@ -4,17 +4,17 @@ from layers.basics import dropout
 
 
 def cnn_layer(
-        embedded_x,
-        max_seq_len,
+        inputs,
         num_filters,
         filter_size,
         is_training,
         dropout_rate,
         reuse=False,
 ):
+    sentence_length = inputs.shape.as_list()[1]
     with tf.variable_scope('convolution', reuse=reuse):
         convoluted = tf.layers.conv1d(
-            inputs=embedded_x,
+            inputs=inputs,
             filters=num_filters,
             kernel_size=[filter_size],
             activation=tf.nn.relu,
@@ -22,7 +22,7 @@ def cnn_layer(
     with tf.variable_scope('pooling', reuse=reuse):
         pooling = tf.layers.max_pooling1d(
             inputs=convoluted,
-            pool_size=[max_seq_len - filter_size + 1],
+            pool_size=[sentence_length - filter_size + 1],
             strides=1,
         )
         pooling_flat = tf.reshape(pooling, [-1, num_filters])
@@ -32,8 +32,7 @@ def cnn_layer(
 
 
 def cnn_layers(
-        embedded_x,
-        max_seq_len,
+        inputs,
         num_filters,
         filter_sizes,
         is_training,
@@ -42,17 +41,18 @@ def cnn_layers(
 ):
     pooled_flats = []
     with tf.variable_scope('cnn_network', reuse=reuse):
-        for i, (n, size) in enumerate(zip(num_filters, filter_sizes)):
-            with tf.variable_scope('cnn_layer_{}'.format(i), reuse=reuse):
-                pooled_flat = cnn_layer(
-                    embedded_x,
-                    max_seq_len,
-                    num_filters=n,
-                    filter_size=size,
-                    is_training=is_training,
-                    dropout_rate=dropout_rate,
-                    reuse=reuse,
-                )
-                pooled_flats.append(pooled_flat)
+        # for i, (n, size) in enumerate(zip(num_filters, filter_sizes)):
+        for i, filters in enumerate(num_filters):
+            for filter_size in filter_sizes:
+                with tf.variable_scope('cnn_layer_{}_{}'.format(i, filter_size), reuse=reuse):
+                    pooled_flat = cnn_layer(
+                        inputs=inputs,
+                        num_filters=filters,
+                        filter_size=filter_size,
+                        is_training=is_training,
+                        dropout_rate=dropout_rate,
+                        reuse=reuse,
+                    )
+                    pooled_flats.append(pooled_flat)
         cnn_output = tf.concat(pooled_flats, axis=1)
     return cnn_output

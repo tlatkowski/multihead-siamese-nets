@@ -1,5 +1,3 @@
-from layers import losses
-
 def parse_list(x):
     return [int(i.strip()) for i in x.split(',')]
 
@@ -18,6 +16,6 @@ class MainConfig:
         self.model_dir = str(main_config['DATA']['model_dir'])
         
         self.char_embeddings = main_config['PARAMS'].getboolean('char_embeddings')
-        self.loss_function = losses.get_loss_function(main_config['PARAMS'].get('loss_function'))
+        self.loss_function = main_config['PARAMS'].get('loss_function')
         self.embedding_size = main_config['PARAMS'].getint('embedding_size')
         self.learning_rate = main_config['TRAINING'].getfloat('learning_rate')
