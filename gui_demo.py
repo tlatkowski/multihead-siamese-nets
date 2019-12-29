@@ -8,7 +8,7 @@ import tensorflow as tf
 from models.model_type import MODELS
 from utils import visualization
 from utils.data_utils import DatasetVectorizer
-from utils.other_utils import init_config
+from utils.other_utils import read_config
 from utils.other_utils import logger
 
 GUI_FONT_SIZE = 14
@@ -42,7 +42,7 @@ class MultiheadSiameseNetGuiDemo:
         self.second_sentence_label = Label(self.frame, text='Sentence 2',
                                            font="Helvetica {}".format(GUI_FONT_SIZE))
         
-        self.main_config = init_config()
+        self.main_config = read_config()
         self.model_dir = str(self.main_config['DATA']['model_dir'])
         
         model_dirs = [os.path.basename(x[0]) for x in os.walk(self.model_dir)]
@@ -120,7 +120,7 @@ class MultiheadSiameseNetGuiDemo:
         logger.info('Loading model: %s', model_name)
         
         model = MODELS[model_name.split('_')[0]]
-        model_config = init_config(model_name.split('_')[0])
+        model_config = read_config(model_name.split('_')[0])
         
         self.model = model(self.max_doc_len, self.vocabulary_size, self.main_config, model_config)
         saver = tf.train.Saver()

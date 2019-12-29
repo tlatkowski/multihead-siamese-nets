@@ -8,14 +8,15 @@ from data import dataset_type
 from data.dataset import Dataset
 from models import model_type
 from models.model_type import MODELS
+from utils import other_utils
 from utils.batch_helper import BatchHelper
 from utils.config_helpers import MainConfig
 from utils.data_utils import DatasetVectorizer
 from utils.log_saver import LogSaver
 from utils.model_evaluator import ModelEvaluator
 from utils.model_saver import ModelSaver
+
 # from utils.other_utils import timer, set_visible_gpu, read_config
-from utils import other_utils
 
 log = tf.logging.info
 
@@ -60,7 +61,7 @@ def train(
     test_labels = test_labels.reshape(-1, 1)
     
     num_batches = dataset_helper.num_batches
-
+    
     model = model(
         max_sequence_len=max_sentence_len,
         vocabulary_size=vocabulary_size,
@@ -229,12 +230,6 @@ def main():
     parser = ArgumentParser()
     
     parser.add_argument(
-        'mode',
-        choices=['train', 'predict'],
-        help='pipeline mode',
-    )
-    
-    parser.add_argument(
         'model',
         choices=['rnn', 'cnn', 'multihead'],
         help='model to be used',
@@ -248,9 +243,9 @@ def main():
     )
     
     parser.add_argument(
-        '--experiment_name',
-        required=False,
-        help='the name of run experiment',
+        '--experiment_path',
+        type=str,
+        help='path to experiments',
     )
     
     parser.add_argument(
@@ -260,24 +255,25 @@ def main():
     )
     
     args = parser.parse_args()
-    if 'train' in args.mode:
-        if args.dataset is None:
-            parser.error('Positional argument [dataset] is mandatory')
     other_utils.set_visible_gpu(args.gpu)
     
     main_config = other_utils.read_config()
-    model_config = other_utils.read_config(args.model)
+    model_configs = other_utils.read_experiment_configs(args.experiment_path)
     
-    mode = args.mode
-    
-    experiment_name = args.experiment_name
-    if experiment_name is None:
-        experiment_name = create_experiment_name(args.model, main_config, model_config)
-    
-    if 'train' in mode:
+    for model_config, experiment_name in model_configs:
+        import tensorflow as tf
+        import os
+        tf.reset_default_graph()
+        experiment_name = os.path.basename(experiment_name).split('.ini')[0]
         train(main_config, model_config, args.model, experiment_name, args.dataset)
-    else:
-        predict(main_config, model_config, args.model, experiment_name)
+    # experiment_name = args.experiment_name
+    # if experiment_name is None:
+    #     experiment_name = create_experiment_name(args.model, main_config, model_config)
+    #
+    # if 'train' in mode:
+    #     train(main_config, model_config, args.model, experiment_name, args.dataset)
+    # else:
+    #     predict(main_config, model_config, args.model, experiment_name)
 
 
 if __name__ == '__main__':
