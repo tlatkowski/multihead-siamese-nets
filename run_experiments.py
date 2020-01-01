@@ -84,10 +84,10 @@ def train(
         init = tf.global_variables_initializer()
         session.run(init)
         log_saver = LogSaver(
-            main_cfg.logs_path,
-            experiment_name,
-            dataset_name,
-            session.graph,
+            logs_path=main_cfg.logs_path,
+            model_name=experiment_name,
+            dateset_name=dataset_name,
+            graph=session.graph,
         )
         model_evaluator = ModelEvaluator(model, session)
         
@@ -264,6 +264,7 @@ def main():
         experiment_name = os.path.basename(experiment_name).split('.ini')[0]
         log('Running experiment {} '.format(experiment_name))
         train(main_config, model_config, args.model, experiment_name, args.dataset)
+        log('Finished experiment {} '.format(experiment_name))
 
 
 if __name__ == '__main__':
