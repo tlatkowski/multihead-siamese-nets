@@ -1,3 +1,4 @@
+import os
 import time
 from argparse import ArgumentParser
 
@@ -15,8 +16,6 @@ from utils.data_utils import DatasetVectorizer
 from utils.log_saver import LogSaver
 from utils.model_evaluator import ModelEvaluator
 from utils.model_saver import ModelSaver
-
-# from utils.other_utils import timer, set_visible_gpu, read_config
 
 log = tf.logging.info
 
@@ -261,19 +260,10 @@ def main():
     model_configs = other_utils.read_experiment_configs(args.experiment_path)
     
     for model_config, experiment_name in model_configs:
-        import tensorflow as tf
-        import os
         tf.reset_default_graph()
         experiment_name = os.path.basename(experiment_name).split('.ini')[0]
+        log('Running experiment {} '.format(experiment_name))
         train(main_config, model_config, args.model, experiment_name, args.dataset)
-    # experiment_name = args.experiment_name
-    # if experiment_name is None:
-    #     experiment_name = create_experiment_name(args.model, main_config, model_config)
-    #
-    # if 'train' in mode:
-    #     train(main_config, model_config, args.model, experiment_name, args.dataset)
-    # else:
-    #     predict(main_config, model_config, args.model, experiment_name)
 
 
 if __name__ == '__main__':
