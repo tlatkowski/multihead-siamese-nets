@@ -1,4 +1,4 @@
-![](https://img.shields.io/badge/Python-3.6-blue.svg) ![](https://img.shields.io/badge/TensorFlow-1.12.2-blue.svg) ![](https://img.shields.io/badge/License-MIT-blue.svg)
+![](https://img.shields.io/badge/Python-3.6-blue.svg) ![](https://img.shields.io/badge/TensorFlow-1.15.2-blue.svg) ![](https://img.shields.io/badge/License-MIT-blue.svg)
 
 # Siamese Deep Neural Networks for semantic similarity.
 This repository contains implementation of Siamese Neural Networks in Tensorflow built based on 3 different and major deep learning architectures:
