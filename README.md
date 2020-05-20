@@ -1,4 +1,4 @@
-![](https://img.shields.io/badge/Python-3.6-blue.svg) ![](https://img.shields.io/badge/TensorFlow-1.15.2-blue.svg) ![](https://img.shields.io/badge/License-MIT-blue.svg)
+[![Financial Contributors on Open Collective](https://opencollective.com/multihead-siamese-nets/all/badge.svg?label=financial+contributors)](https://opencollective.com/multihead-siamese-nets) ![](https://img.shields.io/badge/Python-3.6-blue.svg) ![](https://img.shields.io/badge/TensorFlow-1.15.2-blue.svg) ![](https://img.shields.io/badge/License-MIT-blue.svg)
 
 # Siamese Deep Neural Networks for semantic similarity.
 This repository contains implementation of Siamese Neural Networks in Tensorflow built based on 3 different and major deep learning architectures:
@@ -248,3 +248,33 @@ Training curves (Accuracy & Loss):
 ![QQP][qqp_results]
 
 [qqp_results]: https://github.com/tlatkowski/multihead-siamese-nets/blob/master/pics/qqp_train_curves.png "Evaluation results"
+
+## Contributors
+
+### Code Contributors
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+<a href="https://github.com/tlatkowski/multihead-siamese-nets/graphs/contributors"><img src="https://opencollective.com/multihead-siamese-nets/contributors.svg?width=890&button=false" /></a>
+
+### Financial Contributors
+
+Become a financial contributor and help us sustain our community. [[Contribute](https://opencollective.com/multihead-siamese-nets/contribute)]
+
+#### Individuals
+
+<a href="https://opencollective.com/multihead-siamese-nets"><img src="https://opencollective.com/multihead-siamese-nets/individuals.svg?width=890"></a>
+
+#### Organizations
+
+Support this project with your organization. Your logo will show up here with a link to your website. [[Contribute](https://opencollective.com/multihead-siamese-nets/contribute)]
+
+<a href="https://opencollective.com/multihead-siamese-nets/organization/0/website"><img src="https://opencollective.com/multihead-siamese-nets/organization/0/avatar.svg"></a>
+<a href="https://opencollective.com/multihead-siamese-nets/organization/1/website"><img src="https://opencollective.com/multihead-siamese-nets/organization/1/avatar.svg"></a>
+<a href="https://opencollective.com/multihead-siamese-nets/organization/2/website"><img src="https://opencollective.com/multihead-siamese-nets/organization/2/avatar.svg"></a>
+<a href="https://opencollective.com/multihead-siamese-nets/organization/3/website"><img src="https://opencollective.com/multihead-siamese-nets/organization/3/avatar.svg"></a>
+<a href="https://opencollective.com/multihead-siamese-nets/organization/4/website"><img src="https://opencollective.com/multihead-siamese-nets/organization/4/avatar.svg"></a>
+<a href="https://opencollective.com/multihead-siamese-nets/organization/5/website"><img src="https://opencollective.com/multihead-siamese-nets/organization/5/avatar.svg"></a>
+<a href="https://opencollective.com/multihead-siamese-nets/organization/6/website"><img src="https://opencollective.com/multihead-siamese-nets/organization/6/avatar.svg"></a>
+<a href="https://opencollective.com/multihead-siamese-nets/organization/7/website"><img src="https://opencollective.com/multihead-siamese-nets/organization/7/avatar.svg"></a>
+<a href="https://opencollective.com/multihead-siamese-nets/organization/8/website"><img src="https://opencollective.com/multihead-siamese-nets/organization/8/avatar.svg"></a>
+<a href="https://opencollective.com/multihead-siamese-nets/organization/9/website"><img src="https://opencollective.com/multihead-siamese-nets/organization/9/avatar.svg"></a>
