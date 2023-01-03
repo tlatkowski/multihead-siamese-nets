@@ -1,15 +1,15 @@
 [![Financial Contributors on Open Collective](https://opencollective.com/multihead-siamese-nets/all/badge.svg?label=financial+contributors)](https://opencollective.com/multihead-siamese-nets) ![](https://img.shields.io/badge/Python-3.6-blue.svg) ![](https://img.shields.io/badge/TensorFlow-1.15.2-blue.svg) ![](https://img.shields.io/badge/License-MIT-blue.svg)
 
 # Siamese Deep Neural Networks for semantic similarity.
-This repository contains implementation of Siamese Neural Networks in Tensorflow built based on 3 different and major deep learning architectures:
+This repository contains an implementation of Siamese Neural Networks in Tensorflow built based on 3 different and major deep learning architectures:
 - Convolutional Neural Networks
 - Recurrent Neural Networks
 - Multihead Attention Networks
 
-The main reason of creating this repository is to compare well-known implementaions of Siamese Neural Networks available on GitHub mainly built upon CNN and RNN architectures with Siamese Neural Network built based on multihead attention mechanism originally proposed in Transformer model from [Attention is all you need](https://papers.nips.cc/paper/7181-attention-is-all-you-need.pdf) paper.
+The main reason of creating this repository is to compare well-known implementaions of Siamese Neural Networks available on GitHub mainly built upon CNN and RNN architectures with Siamese Neural Network built based on the multihead attention mechanism originally proposed in the Transformer model from [Attention is all you need](https://papers.nips.cc/paper/7181-attention-is-all-you-need.pdf) paper.
 
 # Supported datasets
-Current version of pipeline supports working with **3** datasets:
+Current version of pipeline supports the following **3** datasets:
 - [The Stanford Natural Language Inference (SNLI) Corpus](https://nlp.stanford.edu/projects/snli/)
 - [Quora Question Pairs](https://www.kaggle.com/c/quora-question-pairs)
 - :new: Adversarial Natural Language Inference (ANLI) benchmark: [GitHub](https://github.com/facebookresearch/anli/), [arXiv](https://arxiv.org/pdf/1910.14599.pdf)
@@ -29,7 +29,7 @@ As as result of executing above script, **corpora** directory
  will be created with **QQP**, **SNLI** and **ANLI** data.
 
 ### Dependency installation
-This project was developed in and has been tested on **Python 3.6**. The package requirements are stored in **requirements** folder.
+This project was developed in and has been tested using **Python 3.6**. The package requirements are stored in the **requirements** folder.
 
 To install the requirements, execute the following command:
 
@@ -43,13 +43,13 @@ pip install -r requirements/requirements-cpu.txt
 ```
 
 # Training models
-To train model run the following command:
+To train a model run the following command:
 
 ```
 python3 run.py train SELECTED_MODEL SELECTED_DATASET --experiment_name NAME --gpu GPU_NUMBER
 ```
 
-where **SELECTED_MODEL** represents one of the selected model among:
+where **SELECTED_MODEL** represents one of the selected models among:
 - cnn
 - rnn
 - multihead
@@ -59,12 +59,12 @@ and **SELECTED_DATASET** is represented by:
 - QQP
 - ANLI
 
-**--experiment_name** is an optional argument used for indicating experiment name. Default value **{SELECTED_MODEL}_{EMBEDDING_SIZE}**. 
+**--experiment_name** is an optional argument used for indicating an experiment name. Default value **{SELECTED_MODEL}_{EMBEDDING_SIZE}**. 
 
 **--gpu** is an optional argument, use it in order to indicate specific GPU on your machine (the default value is '0').
 
 Example (GPU usage):
-Run the following command to train Siamese Neural Network based on CNN and trained on SNLI corpus:
+Run the following command to train Siamese Neural Network based on CNN and trained on the SNLI corpus:
 ```
 python3 run.py train cnn SNLI --gpu 1
 ```
@@ -124,13 +124,13 @@ bidirectional = True
 
 ## Training models with GPU support on Google Colaboratory
 
-If you don't have an access to workstation with GPU, you can use the below exemplary Google Colaboratory
+If you don't have a workstation with GPU, you can use the below exemplary Google Colaboratory
 notebook for training your models (CNN, RNN or Multihead) on SNLI or QQP datasets with usage of **NVIDIA Tesla T4 16GB GPU** 
 available within Google Colaboratory backend: [Multihead Siamese Nets in Google Colab](https://colab.research.google.com/drive/1FUEBV1JkQpF2iwFSDW338nAUhzPVZWAa)
 
 # Testing models
 Download pretrained models from the following link: [pretrained Siamese Nets models](https://drive.google.com/file/d/1STgv1hIxdVpKLQ6-EZK7J3C4ZtfZgbkS/view?usp=sharing), unzip and put them 
-into **./model_dir** directory. After that, you can test models either using predict mode of pipeline: 
+in the **./model_dir** directory. After that, you can test models either using the predict mode of pipeline: 
 ```bash
 python3 run.py predict cnn
 ```
