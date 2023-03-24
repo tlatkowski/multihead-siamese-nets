@@ -2,6 +2,6 @@ tqdm==4.15.0
 pandas==0.22.0
 tflearn==0.3.2
 numpy==1.14.2
-tensorflow==1.15.2
+tensorflow==2.11.1
 seaborn==0.9.0
 jsonlines==1.2.0
